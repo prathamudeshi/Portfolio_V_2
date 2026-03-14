@@ -27,7 +27,7 @@ const bootLines = [
 export default function BootSequence({ onComplete }: Props) {
   const [visibleLines, setVisibleLines] = useState<string[]>([]);
   const [done, setDone] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let idx = 0;
