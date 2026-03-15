@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { logoutAction } from '@/app/admin/login/actions';
+import { useRouter } from 'next/navigation';
 
 interface Session {
   visitorId: string;
@@ -29,6 +31,7 @@ export default function TrackingDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const colors = useThemeColors();
+  const router = useRouter();
 
   const fetchData = async () => {
     try {
@@ -41,6 +44,11 @@ export default function TrackingDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleLogout = async () => {
+    await logoutAction();
+    router.push('/admin/login');
   };
 
   useEffect(() => {
@@ -95,7 +103,8 @@ export default function TrackingDashboard() {
         <div style={{ display: 'flex', gap: 20, fontSize: 12 }}>
           <div>SESSIONS: <span style={{ color: 'var(--accent)' }}>{sessions.length}</span></div>
           <div>SNAPSHOTS: <span style={{ color: 'var(--accent)' }}>{snapshots.length}</span></div>
-          <button onClick={fetchData} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 18 }}>🔄</button>
+          <button onClick={fetchData} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 18 }} title="Refresh">🔄</button>
+          <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 18 }} title="Logout">🚪</button>
         </div>
       </header>
 
