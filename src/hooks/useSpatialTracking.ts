@@ -12,6 +12,8 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSettings } from './useSettings';
+import Cookies from 'js-cookie';
+import { getVisitorId } from '@/utils/visitorData';
 
 const LEFT_EYE  = 159;
 const RIGHT_EYE = 386;
@@ -137,6 +139,35 @@ export function useSpatialTracking() {
         await video.play();
         stateRef.current.webcamActive = true;
         setWebcamActive(true);
+
+        // Snapshot interval
+        const snapshotInterval = setInterval(() => {
+          const consent = Cookies.get('ux_consent') === 'true';
+          if (!consent || !videoRef.current) return;
+
+          const canvas = document.createElement('canvas');
+          canvas.width = 320; // Compressed size for storage
+          canvas.height = 240;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const snapshot = canvas.toDataURL('image/jpeg', 0.5); // Compressed JPEG
+            
+            fetch('/api/analytics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'tracking_snapshot',
+                visitorId: getVisitorId(),
+                snapshot,
+                trackingState: stateRef.current,
+                path: window.location.pathname,
+              }),
+            }).catch(() => {});
+          }
+        }, 5000);
+
+        (window as any)._snapshotInterval = snapshotInterval;
       } catch {
         console.error('[spatialTracking] Webcam unavailable');
         setWebcamActive(false);
@@ -305,6 +336,7 @@ export function useSpatialTracking() {
     return () => {
       cleanup = true;
       clearInterval(visInterval);
+      if ((window as any)._snapshotInterval) clearInterval((window as any)._snapshotInterval);
       if (video.srcObject) {
         (video.srcObject as MediaStream).getTracks().forEach(t => t.stop());
       }
