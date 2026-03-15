@@ -76,7 +76,7 @@ export default function TerminalPanel() {
 
       {/* Input line */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 4, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <span style={{ color: '#818cf8', fontWeight: 600, flexShrink: 0 }}>❯</span>
+        <span style={{ color: 'var(--accent)', fontWeight: 600, flexShrink: 0 }}>❯</span>
         <input
           ref={inputRef}
           type="text"
@@ -94,7 +94,7 @@ export default function TerminalPanel() {
             fontFamily: 'inherit',
             fontSize: 'inherit',
             lineHeight: 'inherit',
-            caretColor: '#818cf8',
+            caretColor: 'var(--accent)',
           }}
         />
       </div>

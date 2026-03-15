@@ -16,6 +16,7 @@ import ProjectsPanel from '@/components/panels/ProjectsPanel';
 import SkillsPanel from '@/components/panels/SkillsPanel';
 import ProfilesPanel from '@/components/panels/ProfilesPanel';
 import ContactPanel from '@/components/panels/ContactPanel';
+import SettingsPanel from '@/components/panels/SettingsPanel';
 
 interface PanelConfig {
   id: PanelId;
@@ -32,6 +33,7 @@ const panelConfigs: PanelConfig[] = [
   { id: 'skills',     title: 'skills.graph',    icon: '⚡', content: <SkillsPanel /> },
   { id: 'profiles',   title: 'profiles.link',   icon: '🔗', content: <ProfilesPanel /> },
   { id: 'contact',    title: 'contact.form',    icon: '📧', content: <ContactPanel /> },
+  { id: 'settings',   title: 'settings.cfg',    icon: '⚙️', content: <SettingsPanel /> },
 ];
 
 export default function SceneContent() {

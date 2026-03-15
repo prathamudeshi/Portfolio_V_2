@@ -90,7 +90,7 @@ export default function BootSequence({ onComplete }: Props) {
                   color: line.startsWith('[OK]')
                     ? '#22c55e'
                     : line.startsWith('NEXUS')
-                    ? '#818cf8'
+                    ? 'var(--accent)'
                     : line.startsWith('─')
                     ? '#334155'
                     : '#94a3b8',
@@ -103,7 +103,7 @@ export default function BootSequence({ onComplete }: Props) {
             <motion.span
               animate={{ opacity: [1, 0] }}
               transition={{ repeat: Infinity, duration: 0.8 }}
-              style={{ display: 'inline-block', color: '#818cf8', fontSize: 14 }}
+              style={{ display: 'inline-block', color: 'var(--accent)', fontSize: 14 }}
             >
               █
             </motion.span>

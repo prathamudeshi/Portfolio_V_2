@@ -14,7 +14,7 @@ export default function AboutPanel() {
           width: 100,
           height: 100,
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #818cf8 0%, #22d3ee 100%)',
+          background: 'linear-gradient(135deg, var(--accent) 0%, #22d3ee 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -28,7 +28,7 @@ export default function AboutPanel() {
 
       <div>
         <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0, color: '#f1f5f9' }}>{about.fullName}</h2>
-        <p style={{ fontSize: 14, color: '#818cf8', margin: '4px 0', fontWeight: 500 }}>{about.title}</p>
+        <p style={{ fontSize: 14, color: 'var(--accent)', margin: '4px 0', fontWeight: 500 }}>{about.title}</p>
         <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>{about.subtitle}</p>
       </div>
 
@@ -51,7 +51,7 @@ export default function AboutPanel() {
           borderRadius: 8,
           background: 'rgba(130, 140, 248, 0.15)',
           border: '1px solid rgba(130, 140, 248, 0.3)',
-          color: '#818cf8',
+          color: 'var(--accent)',
           fontSize: 13,
           fontWeight: 500,
           textDecoration: 'none',
@@ -64,3 +64,4 @@ export default function AboutPanel() {
     </div>
   );
 }
+

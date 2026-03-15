@@ -8,6 +8,7 @@
 import { useState, useCallback, useRef } from 'react';
 import commands, { type CommandResult } from '@/data/commands';
 import { usePanelManager } from './usePanelManager';
+import { useSettings, type ThemeName } from './useSettings';
 
 interface TerminalLine {
   text: string;
@@ -17,7 +18,7 @@ interface TerminalLine {
 
 export function useTerminal() {
   const [history, setHistory] = useState<TerminalLine[]>([
-    { text: 'NEXUS Terminal v2.1.0', color: '#818cf8' },
+    { text: 'NEXUS Terminal v2.1.0', color: 'var(--accent)' },
     { text: 'Type "help" for available commands.', color: '#64748b' },
     { text: '' },
   ]);
@@ -25,7 +26,8 @@ export function useTerminal() {
   const commandHistory = useRef<string[]>([]);
   const historyIndex = useRef(-1);
 
-  const { openPanel, focusPanel, setTheme } = usePanelManager();
+  const { openPanel, focusPanel } = usePanelManager();
+  const settingsSetTheme = useSettings((s) => s.setTheme);
 
   const executeCommand = useCallback((rawInput: string) => {
     const trimmed = rawInput.trim();
@@ -72,12 +74,12 @@ export function useTerminal() {
     }
 
     if (result.action === 'theme' && result.actionPayload) {
-      setTheme(result.actionPayload);
+      settingsSetTheme(result.actionPayload as ThemeName);
     }
 
     setHistory((prev) => [...prev, inputLine, ...result.lines, { text: '' }]);
     setInput('');
-  }, [openPanel, focusPanel, setTheme]);
+  }, [openPanel, focusPanel, settingsSetTheme]);
 
   const navigateHistory = useCallback((direction: 'up' | 'down') => {
     const cmds = commandHistory.current;

@@ -4,7 +4,7 @@
 
 import { create } from 'zustand';
 
-export type PanelId = 'about' | 'terminal' | 'experience' | 'projects' | 'skills' | 'profiles' | 'contact';
+export type PanelId = 'about' | 'terminal' | 'experience' | 'projects' | 'skills' | 'profiles' | 'contact' | 'settings';
 
 export interface PanelState {
   isOpen: boolean;
@@ -44,6 +44,7 @@ const defaultPanels: Record<PanelId, PanelState> = {
   skills:     { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 5, position: [ -3.5, -1.0, -5.5], size: [480, 380] },
   profiles:   { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 6, position: [  3.5, -0.8, -4  ], size: [420, 360] },
   contact:    { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 7, position: [  0,    2.2, -6  ], size: [360, 320] },
+  settings:   { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 8, position: [  2.0,  0.5, -3.5], size: [440, 520] },
 };
 
 export const usePanelManager = create<PanelManagerState>((set) => ({

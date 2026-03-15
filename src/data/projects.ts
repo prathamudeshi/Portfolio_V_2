@@ -73,6 +73,38 @@ const projects: Project[] = [
     techStack: ['Python', 'Microsoft MSAL', 'OAuth 2.0', 'SharePoint API', 'OneDrive API'],
     featured: false,
   },
+  {
+    id: 'ignite-web',
+    title: 'IGNITE-WEB',
+    description: 'EdTech AI platform that transforms user prompts into production-ready websites.',
+    longDescription: 'Added support for runtime editing, allowing users to customize layout, text, and styling live. Focused on AI prompt structuring, mapping natural language to web layout logic.',
+    techStack: ['AI Prompt-to-Code', 'Runtime Editing', 'React.js', 'No-code'],
+  },
+  {
+    id: 'hostkar',
+    title: 'HOSTKAR (Vercel Clone)',
+    description: 'CI/CD web platform for deploying static and dynamic sites.',
+    longDescription: 'Users can deploy sites by simply pasting a GitHub repo link. Introduced backend deployment principles using Node.js, Express, with automatic build and hosting.',
+    techStack: ['Node.js', 'Express', 'CI/CD', 'Automated Deployment'],
+  },
+  {
+    id: 'stock-scope',
+    title: 'STOCK-SCOPE',
+    description: 'Fintech platform providing detailed stock stats and live charts with portfolio insights.',
+    techStack: ['Fintech', 'Data Visualization', 'Charts', 'Real-time Data'],
+  },
+  {
+    id: 'roomers',
+    title: 'ROOMERS',
+    description: 'Social media chat app with AJAX-based real-time messaging, emoji/GIF support.',
+    techStack: ['AJAX', 'Real-time Messaging', 'Chat App'],
+  },
+  {
+    id: 'prompt-search',
+    title: 'Prompt-Search',
+    description: 'Solved hallucination in LLMs using auto-enhanced query generation and Google CSE.',
+    techStack: ['LLM', 'Google CSE', 'RAG'],
+  }
 ];
 
 export default projects;

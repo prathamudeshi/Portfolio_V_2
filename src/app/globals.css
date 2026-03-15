@@ -1,8 +1,52 @@
 @import "tailwindcss";
 
-:root {
+/* ── Theme System ────────────────────────────────────────────── */
+:root,
+[data-theme="indigo"] {
   --background: #05050f;
   --foreground: #e2e8f0;
+  --accent: #818cf8;
+  --accent-mid: #6366f1;
+  --accent-deep: #4f46e5;
+  --accent-r: 129;
+  --accent-g: 140;
+  --accent-b: 248;
+}
+
+[data-theme="emerald"] {
+  --accent: #34d399;
+  --accent-mid: #10b981;
+  --accent-deep: #059669;
+  --accent-r: 52;
+  --accent-g: 211;
+  --accent-b: 153;
+}
+
+[data-theme="rose"] {
+  --accent: #fb7185;
+  --accent-mid: #f43f5e;
+  --accent-deep: #e11d48;
+  --accent-r: 251;
+  --accent-g: 113;
+  --accent-b: 133;
+}
+
+[data-theme="amber"] {
+  --accent: #fbbf24;
+  --accent-mid: #f59e0b;
+  --accent-deep: #d97706;
+  --accent-r: 251;
+  --accent-g: 191;
+  --accent-b: 36;
+}
+
+[data-theme="cyan"] {
+  --accent: #22d3ee;
+  --accent-mid: #06b6d4;
+  --accent-deep: #0891b2;
+  --accent-r: 34;
+  --accent-g: 211;
+  --accent-b: 238;
 }
 
 @theme inline {
@@ -20,9 +64,25 @@
 
 body {
   background: var(--background);
+  background-image:
+    radial-gradient(ellipse at 30% 40%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 60%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.04) 0%, transparent 55%);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   overflow: hidden;
+}
+
+/* Subtle noise grain overlay for texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
 }
 
 /* Custom scrollbar for panels */
@@ -33,21 +93,21 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(130, 140, 248, 0.2);
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.2);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(130, 140, 248, 0.35);
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.35);
 }
 
 /* Selection color */
 ::selection {
-  background: rgba(130, 140, 248, 0.3);
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.3);
   color: #f1f5f9;
 }
 
 /* Focus outlines */
 :focus-visible {
-  outline: 2px solid rgba(130, 140, 248, 0.5);
+  outline: 2px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.5);
   outline-offset: 2px;
 }

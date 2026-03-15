@@ -2,9 +2,16 @@
 /**
  * useSpatialTracking.ts — Unified React hook for webcam Face & Hand tracking.
  * uses MediaPipe Face Mesh + Hands on a single shared video stream.
+ * 
+ * Enhanced with:
+ * - EMA smoothing for hand position (reduces shakiness)
+ * - Pinch debouncing & hysteresis (prevents false triggers)
+ * - Settings integration for all configurable parameters
+ * - Dead zone filtering for micro-jitter suppression
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useSettings } from './useSettings';
 
 const LEFT_EYE  = 159;
 const RIGHT_EYE = 386;
@@ -45,6 +52,13 @@ function distance(p1: {x: number, y: number}, p2: {x: number, y: number}) {
   return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 }
 
+/** Exponential Moving Average */
+function ema(current: number, previous: number, alpha: number): number {
+  return alpha * current + (1 - alpha) * previous;
+}
+
+const DEAD_ZONE = 0.003; // Ignore movements smaller than this (normalized)
+
 export function useSpatialTracking() {
   const stateRef = useRef<SpatialState>({
     headX: 0, headY: 0, headZ: 0, faceDetected: false,
@@ -52,11 +66,29 @@ export function useSpatialTracking() {
     webcamActive: false,
   });
   
+  // Smoothing state — kept in refs for perf (no re-renders)
+  const smoothRef = useRef({
+    handX: 0.5,
+    handY: 0.5,
+    pinchFrames: 0,       // consecutive frames pinch has been detected
+    releasedFrames: 0,    // consecutive frames pinch has NOT been detected
+    isPinchLocked: false, // debounced pinch state
+  });
+  
   const [webcamActive, setWebcamActive] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Read settings at mount and subscribe to changes
+  const settingsRef = useRef(useSettings.getState());
+  useEffect(() => {
+    const unsub = useSettings.subscribe(state => {
+      settingsRef.current = state;
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     const video = document.createElement('video');
@@ -79,6 +111,20 @@ export function useSpatialTracking() {
     videoRef.current = video;
 
     let cleanup = false;
+
+    // Webcam visibility sync interval
+    const visInterval = setInterval(() => {
+      if (videoRef.current) {
+        const s = settingsRef.current;
+        if (s.showWebcam && s.handTrackingEnabled) {
+          videoRef.current.style.opacity = String(s.webcamOpacity);
+          videoRef.current.style.pointerEvents = 'auto';
+        } else {
+          videoRef.current.style.opacity = '0';
+          videoRef.current.style.pointerEvents = 'none';
+        }
+      }
+    }, 200);
 
     (async () => {
       try {
@@ -112,16 +158,26 @@ export function useSpatialTracking() {
         faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         faceMesh.onResults((results: any) => {
+          const settings = settingsRef.current;
+          if (!settings.faceTrackingEnabled) {
+            stateRef.current.headX = 0;
+            stateRef.current.headY = 0;
+            stateRef.current.headZ = 0;
+            return;
+          }
+
           if (results.multiFaceLandmarks?.length > 0) {
             const lm = results.multiFaceLandmarks[0];
             const le = lm[LEFT_EYE];
             const re = lm[RIGHT_EYE];
             
-            // X/Y
+            const sensitivity = settings.faceSensitivity;
+            
+            // X/Y with sensitivity multiplier
             const mx = (le.x + re.x) / 2;
             const my = (le.y + re.y) / 2;
-            stateRef.current.headX = -(mx - 0.5) * 2;
-            stateRef.current.headY = -(my - 0.5) * 2;
+            stateRef.current.headX = -(mx - 0.5) * 2 * sensitivity;
+            stateRef.current.headY = -(my - 0.5) * 2 * sensitivity;
             
             // Z
             const eyeDist = distance(le, re);
@@ -141,21 +197,62 @@ export function useSpatialTracking() {
         const hands = new HandsClass({
           locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
         });
-        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         hands.onResults((results: any) => {
+          const settings = settingsRef.current;
+          if (!settings.handTrackingEnabled) {
+            stateRef.current.handDetected = false;
+            stateRef.current.isPinching = false;
+            stateRef.current.isPointing = false;
+            stateRef.current.isOpenPalm = false;
+            if (handDetected) setHandDetected(false);
+            return;
+          }
+
           if (results.multiHandLandmarks?.length > 0) {
             const lm = results.multiHandLandmarks[0];
+            const sm = smoothRef.current;
             
-            // Webcam is mirrored via CSS scaleX(-1). 
-            // In MediaPipe, x=0 is left of the image (right side of user).
-            // To map to screen where 0 is left, 1 is right, we take 1 - x.
-            stateRef.current.handX = 1 - lm[8].x; 
-            stateRef.current.handY = lm[8].y;
+            // ── Raw position ──
+            const rawX = 1 - lm[8].x;
+            const rawY = lm[8].y;
+            
+            // ── EMA Smoothing ──
+            const alpha = settings.handSmoothingFactor; // lower = smoother
+            const newX = ema(rawX, sm.handX, alpha);
+            const newY = ema(rawY, sm.handY, alpha);
+            
+            // ── Dead zone filter ──
+            if (Math.abs(newX - sm.handX) > DEAD_ZONE || Math.abs(newY - sm.handY) > DEAD_ZONE) {
+              sm.handX = newX;
+              sm.handY = newY;
+            }
+            
+            stateRef.current.handX = sm.handX;
+            stateRef.current.handY = sm.handY;
 
-            // Pinch: distance between thumb tip (4) and index tip (8)
+            // ── Pinch with hysteresis + debouncing ──
             const pinchDist = distance(lm[4], lm[8]);
-            stateRef.current.isPinching = pinchDist < 0.05;
+            const rawPinch = pinchDist < settings.pinchThreshold;
+            const rawRelease = pinchDist > settings.pinchReleaseThreshold;
+            
+            if (rawPinch) {
+              sm.pinchFrames++;
+              sm.releasedFrames = 0;
+            } else {
+              sm.releasedFrames++;
+              if (rawRelease) sm.pinchFrames = 0;
+            }
+            
+            // Debounce: require N consecutive frames to enter/exit pinch
+            if (!sm.isPinchLocked && sm.pinchFrames >= settings.pinchDebounceFrames) {
+              sm.isPinchLocked = true;
+            } else if (sm.isPinchLocked && sm.releasedFrames >= 2) {
+              sm.isPinchLocked = false;
+            }
+            
+            stateRef.current.isPinching = sm.isPinchLocked;
 
             // Fingers distance from wrist (0) compared to their MCP joints
             const indexExt = distance(lm[8], lm[0]) > distance(lm[5], lm[0]);
@@ -173,9 +270,15 @@ export function useSpatialTracking() {
               stateRef.current.handDetected = true;
               setHandDetected(true);
             }
-          } else if (stateRef.current.handDetected) {
-            stateRef.current.handDetected = false;
-            setHandDetected(false);
+          } else {
+            // Hand lost — reset smooth state
+            if (stateRef.current.handDetected) {
+              stateRef.current.handDetected = false;
+              setHandDetected(false);
+              smoothRef.current.isPinchLocked = false;
+              smoothRef.current.pinchFrames = 0;
+              smoothRef.current.releasedFrames = 0;
+            }
           }
         });
 
@@ -185,8 +288,9 @@ export function useSpatialTracking() {
         const cam = new CameraClass(video, {
           onFrame: async () => {
             if (cleanup) return;
-            await faceMesh.send({ image: video });
-            await hands.send({ image: video });
+            const s = settingsRef.current;
+            if (s.faceTrackingEnabled) await faceMesh.send({ image: video });
+            if (s.handTrackingEnabled) await hands.send({ image: video });
           },
           width: 640,
           height: 480,
@@ -200,20 +304,16 @@ export function useSpatialTracking() {
 
     return () => {
       cleanup = true;
+      clearInterval(visInterval);
       if (video.srcObject) {
         (video.srcObject as MediaStream).getTracks().forEach(t => t.stop());
       }
       video.remove();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getSpatialState = useCallback(() => stateRef.current, []);
 
-  const showDebugVideo = useCallback((show: boolean) => {
-    if (videoRef.current) {
-      videoRef.current.style.opacity = show ? '0.85' : '0';
-    }
-  }, []);
-
-  return { getSpatialState, webcamActive, faceDetected, handDetected, showDebugVideo };
+  return { getSpatialState, webcamActive, faceDetected, handDetected };
 }

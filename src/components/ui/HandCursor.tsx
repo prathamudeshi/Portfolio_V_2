@@ -2,10 +2,12 @@
 /**
  * HandCursor.tsx — Visual overlay for MediaPipe hand tracking.
  * Reads hand position/state from useSpatialTracking every frame.
+ * Cursor size is configurable via settings.
  */
 
 import { useEffect, useRef } from 'react';
 import { type SpatialState } from '@/hooks/useSpatialTracking';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function HandCursor({ getSpatialState }: { getSpatialState: () => SpatialState }) {
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -17,14 +19,20 @@ export default function HandCursor({ getSpatialState }: { getSpatialState: () =>
 
     const loop = () => {
       const state = getSpatialState();
+      const settings = useSettings.getState();
 
       if (cursorRef.current && ringRef.current) {
-        if (!state.handDetected) {
+        if (!state.handDetected || !settings.handTrackingEnabled) {
           cursorRef.current.style.opacity = '0';
           ringRef.current.style.opacity = '0';
         } else {
           const px = state.handX * window.innerWidth;
           const py = state.handY * window.innerHeight;
+          const size = settings.cursorSize;
+
+          // Update cursor size dynamically
+          cursorRef.current.style.width = `${size}px`;
+          cursorRef.current.style.height = `${size}px`;
 
           // Main cursor dot
           cursorRef.current.style.opacity = '1';
@@ -92,7 +100,7 @@ export default function HandCursor({ getSpatialState }: { getSpatialState: () =>
           pointerEvents: 'none',
           zIndex: 9999,
           opacity: 0,
-          transition: 'background-color 0.15s, box-shadow 0.15s, transform 0.1s cubic-bezier(0.2, 0, 0, 1)',
+          transition: 'background-color 0.15s, box-shadow 0.15s, width 0.2s, height 0.2s, transform 0.06s linear',
         }}
       />
     </>

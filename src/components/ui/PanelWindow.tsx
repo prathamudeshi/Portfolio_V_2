@@ -97,7 +97,7 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
             background: 'rgba(10, 10, 30, 0.92)',
             backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
             borderRadius: 16,
-            border: '1px solid rgba(130, 140, 248, 0.2)',
+            border: '1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.2)',
             boxShadow: '0 12px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
             overflow: 'hidden', color: '#e2e8f0',
           }}
@@ -125,7 +125,7 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderRadius: 14,
-        border: '1px solid rgba(130, 140, 248, 0.15)',
+        border: '1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.15)',
         boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
         overflow: 'hidden',
         color: '#e2e8f0',
@@ -185,9 +185,9 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
       >
         {/* Visual grip lines */}
         <svg width="18" height="18" viewBox="0 0 18 18" style={{ position: 'absolute', bottom: 2, right: 2 }}>
-          <line x1="14" y1="4" x2="4" y2="14" stroke="rgba(130,140,248,0.3)" strokeWidth="1.5" />
-          <line x1="14" y1="8" x2="8" y2="14" stroke="rgba(130,140,248,0.3)" strokeWidth="1.5" />
-          <line x1="14" y1="12" x2="12" y2="14" stroke="rgba(130,140,248,0.3)" strokeWidth="1.5" />
+          <line x1="14" y1="4" x2="4" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
+          <line x1="14" y1="8" x2="8" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
+          <line x1="14" y1="12" x2="12" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
         </svg>
       </div>
     </motion.div>

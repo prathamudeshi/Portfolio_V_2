@@ -12,7 +12,7 @@ export default function ExperiencePanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <h3 style={{ fontSize: 15, fontWeight: 600, color: '#818cf8', margin: 0 }}>📋 Experience Timeline</h3>
+      <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--accent)', margin: 0 }}>📋 Experience Timeline</h3>
 
       {experience.map((exp) => (
         <motion.div
@@ -32,7 +32,7 @@ export default function ExperiencePanel() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>{exp.role}</div>
-              <div style={{ fontSize: 13, color: '#818cf8' }}>{exp.company}</div>
+              <div style={{ fontSize: 13, color: 'var(--accent)' }}>{exp.company}</div>
             </div>
             <div style={{ fontSize: 11, color: '#64748b', flexShrink: 0, fontFamily: 'monospace' }}>{exp.period}</div>
           </div>
@@ -51,7 +51,7 @@ export default function ExperiencePanel() {
                 <ul style={{ margin: 0, padding: '0 0 0 16px', listStyle: 'none' }}>
                   {exp.highlights.map((h, i) => (
                     <li key={i} style={{ fontSize: 12, color: '#cbd5e1', lineHeight: 1.7, position: 'relative', paddingLeft: 8 }}>
-                      <span style={{ position: 'absolute', left: -8, color: '#818cf8' }}>▸</span>
+                      <span style={{ position: 'absolute', left: -8, color: 'var(--accent)' }}>▸</span>
                       {h}
                     </li>
                   ))}
@@ -66,7 +66,7 @@ export default function ExperiencePanel() {
                         padding: '2px 8px',
                         borderRadius: 4,
                         background: 'rgba(130, 140, 248, 0.12)',
-                        color: '#818cf8',
+                        color: 'var(--accent)',
                         fontFamily: 'monospace',
                       }}
                     >
