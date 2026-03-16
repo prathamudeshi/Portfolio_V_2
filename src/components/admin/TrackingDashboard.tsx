@@ -69,7 +69,7 @@ export default function TrackingDashboard() {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '100vh', 
       background: '#05050f', 
       color: '#cbd5e1', 
       fontFamily: 'Inter, sans-serif',
