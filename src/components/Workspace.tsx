@@ -20,6 +20,9 @@ import BootSequence from '@/components/ui/BootSequence';
 import FullscreenPrompt from '@/components/ui/FullscreenPrompt';
 import SceneContent from '@/components/3d/SceneContent';
 import HandCursor from '@/components/ui/HandCursor';
+import DesktopIcons from '@/components/ui/DesktopIcons';
+import GuideDialog from '@/components/ui/GuideDialog';
+import { useGuide } from '@/hooks/useGuide';
 
 // R3F Canvas wrapper — must be loaded client-side only
 const SpatialWorkspace = dynamic(() => import('@/components/3d/SpatialWorkspace'), { ssr: false });
@@ -35,6 +38,7 @@ export default function Workspace() {
   const [showBoot, setShowBoot] = useState(true);
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false);
   const [readyToShow, setReadyToShow] = useState(false);
+  const startGuide = useGuide(s => s.startGuide);
 
   // Sync fullscreen state with browser
   useEffect(() => {
@@ -54,7 +58,12 @@ export default function Workspace() {
     setShowFullscreenPrompt(false);
     setReadyToShow(true);
     setBoot(true);
-  }, [setBoot]);
+    
+    // Start guide after a small delay to let the scene settle
+    setTimeout(() => {
+      startGuide();
+    }, 1500);
+  }, [setBoot, startGuide]);
 
   return (
     <>
@@ -102,7 +111,11 @@ export default function Workspace() {
             </div>
           </div>
 
+          <DesktopIcons />
+
           <Dock />
+
+          <GuideDialog />
         </>
       )}
     </>

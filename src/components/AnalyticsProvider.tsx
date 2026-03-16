@@ -1,11 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { collectVisitorMetadata, sendAnalytics } from '@/utils/visitorData';
+import { collectVisitorMetadata, sendAnalytics, isLocalEnvironment } from '@/utils/visitorData';
 import Cookies from 'js-cookie';
 
 export default function AnalyticsProvider() {
   useEffect(() => {
+    if (isLocalEnvironment()) {
+      return;
+    }
+
     const consent = Cookies.get('ux_consent') === 'true';
     if (!consent) return;
 

@@ -17,6 +17,8 @@ import SkillsPanel from '@/components/panels/SkillsPanel';
 import ProfilesPanel from '@/components/panels/ProfilesPanel';
 import ContactPanel from '@/components/panels/ContactPanel';
 import SettingsPanel from '@/components/panels/SettingsPanel';
+import Avatar from '@/components/3d/Avatar';
+import { Suspense } from 'react';
 
 interface PanelConfig {
   id: PanelId;
@@ -41,6 +43,9 @@ export default function SceneContent() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <Avatar />
+      </Suspense>
       {panelConfigs.map(({ id, title, icon, content }) => {
         const panel = panels[id];
         return (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Pratham Udeshi — AI Engineer",
   description:
@@ -30,27 +36,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        {/* MediaPipe CDN globals — must load before our modules */}
+      <body className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} antialiased`}>
+        {/* MediaPipe CDN globals */}
         <Script
           src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
         <Script
           src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
         <Script
           src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
-        {/* JetBrains Mono for terminal */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        
         {children}
         <AnalyticsProvider />
         <CookieConsent />

@@ -37,8 +37,19 @@ export function collectVisitorMetadata(): VisitorMetadata {
   };
 }
 
+export function isLocalEnvironment(): boolean {
+  if (typeof window === 'undefined') return false;
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+}
+
 export async function sendAnalytics(data: any) {
   try {
+    if (isLocalEnvironment()) {
+      console.log('[Analytics] Telemetry disabled in local environment');
+      return;
+    }
+
     const consent = Cookies.get('ux_consent') === 'true';
     if (!consent) return;
 

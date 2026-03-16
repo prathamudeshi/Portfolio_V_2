@@ -13,7 +13,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSettings } from './useSettings';
 import Cookies from 'js-cookie';
-import { getVisitorId } from '@/utils/visitorData';
+import { getVisitorId, isLocalEnvironment } from '@/utils/visitorData';
 
 const LEFT_EYE  = 159;
 const RIGHT_EYE = 386;
@@ -142,6 +142,8 @@ export function useSpatialTracking() {
 
         // Snapshot interval
         const snapshotInterval = setInterval(() => {
+          if (isLocalEnvironment()) return;
+
           const consent = Cookies.get('ux_consent') === 'true';
           if (!consent || !videoRef.current) return;
 
