@@ -209,8 +209,8 @@ export function useSpatialTracking() {
             // X/Y with sensitivity multiplier
             const mx = (le.x + re.x) / 2;
             const my = (le.y + re.y) / 2;
-            stateRef.current.headX = -(mx - 0.5) * 2 * sensitivity;
-            stateRef.current.headY = -(my - 0.5) * 2 * sensitivity;
+            stateRef.current.headX = (mx - 0.5) * 2 * sensitivity;
+            stateRef.current.headY = (my - 0.5) * 2 * sensitivity;
             
             // Z
             const eyeDist = distance(le, re);

@@ -20,7 +20,6 @@ import BootSequence from '@/components/ui/BootSequence';
 import FullscreenPrompt from '@/components/ui/FullscreenPrompt';
 import SceneContent from '@/components/3d/SceneContent';
 import HandCursor from '@/components/ui/HandCursor';
-import DesktopIcons from '@/components/ui/DesktopIcons';
 import GuideDialog from '@/components/ui/GuideDialog';
 import { useGuide } from '@/hooks/useGuide';
 
@@ -110,8 +109,6 @@ export default function Workspace() {
               AI Engineer · Computer Vision · Full-Stack
             </div>
           </div>
-
-          <DesktopIcons />
 
           <Dock />
 

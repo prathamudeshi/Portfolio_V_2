@@ -8,13 +8,11 @@ interface DesktopIconProps {
   id: PanelId;
   icon: string;
   label: string;
-  initialX?: number;
-  initialY?: number;
 }
 
 const GRID_SIZE = 100;
 
-export default function DesktopIcon({ id, icon, label, initialX = 0, initialY = 0 }: DesktopIconProps) {
+export default function DesktopIcon({ id, icon, label }: DesktopIconProps) {
   const { togglePanel } = usePanelManager();
   const [isHovered, setIsHovered] = useState(false);
   const isDragging = useRef(false);
@@ -36,7 +34,7 @@ export default function DesktopIcon({ id, icon, label, initialX = 0, initialY = 
           isDragging.current = false;
         }, 100);
       }}
-      initial={{ x: initialX, y: initialY, opacity: 0, scale: 0.8 }}
+      initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -56,8 +54,8 @@ export default function DesktopIcon({ id, icon, label, initialX = 0, initialY = 
         justifyContent: 'center',
         cursor: 'pointer',
         userSelect: 'none',
-        position: 'absolute',
-        zIndex: 5,
+        // In 3D Html transform, we don't need absolute positioning
+        position: 'relative',
       }}
     >
       <div
