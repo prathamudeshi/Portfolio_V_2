@@ -17,11 +17,15 @@ interface TerminalLine {
 }
 
 export function useTerminal() {
-  const [history, setHistory] = useState<TerminalLine[]>([
-    { text: 'NEXUS Terminal v2.1.0', color: 'var(--accent)' },
-    { text: 'Type "help" for available commands.', color: '#64748b' },
-    { text: '' },
-  ]);
+  const [history, setHistory] = useState<TerminalLine[]>(() => {
+    const helpResult = commands.help.handler([]);
+    return [
+      { text: 'NEXUS Terminal v2.1.0', color: 'var(--accent)' },
+      { text: '❯ help', color: '#22d3ee', isInput: true },
+      ...helpResult.lines,
+      { text: '' },
+    ];
+  });
   const [input, setInput] = useState('');
   const commandHistory = useRef<string[]>([]);
   const historyIndex = useRef(-1);

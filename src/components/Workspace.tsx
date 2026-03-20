@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import { AnimatePresence } from 'framer-motion';
 import { useSpatialTracking } from '@/hooks/useSpatialTracking';
 import { useGestureDispatch } from '@/hooks/useGestureDispatch';
+import { useGlobalGestures } from '@/hooks/useGlobalGestures';
 import { usePanelManager } from '@/hooks/usePanelManager';
 import { useSettings } from '@/hooks/useSettings';
 import Dock from '@/components/ui/Dock';
@@ -30,6 +31,7 @@ export default function Workspace() {
   const { getSpatialState, webcamActive, faceDetected, handDetected } = useSpatialTracking();
   useGestureDispatch(getSpatialState);
   const { booted, setBoot } = usePanelManager();
+  useGlobalGestures(booted);
   const showStatusOverlay = useSettings(s => s.showStatusOverlay);
   const isFullscreen = useSettings(s => s.isFullscreen);
   const setIsFullscreen = useSettings(s => s.setIsFullscreen);

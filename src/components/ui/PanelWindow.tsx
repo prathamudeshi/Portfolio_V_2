@@ -1,4 +1,4 @@
-'use client';
+"use client";
 /**
  * PanelWindow.tsx — Glassmorphism window with drag and resize.
  *
@@ -7,9 +7,9 @@
  * Positioned by ScenePanel in 3D space. Maximize breaks out to fixed overlay.
  */
 
-import { motion } from 'framer-motion';
-import { type ReactNode, useCallback, useRef } from 'react';
-import { usePanelManager, type PanelId } from '@/hooks/usePanelManager';
+import { motion } from "framer-motion";
+import { type ReactNode, useCallback, useRef, useState, useEffect } from "react";
+import { usePanelManager, type PanelId } from "@/hooks/usePanelManager";
 
 interface Props {
   id: PanelId;
@@ -25,6 +25,11 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
   const [width, height] = panel.size;
 
   const handleFocus = useCallback(() => focusPanel(id), [focusPanel, id]);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ── Drag state ──────────────────────────────────────────────
   const dragRef = useRef<{ startX: number; startY: number } | null>(null);
@@ -76,10 +81,10 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
 
   // ── Maximized overlay ─────────────────────────────────────────
   if (panel.isMaximized) {
-    return (
+    const overlay = (
       <div
         style={{
-          position: 'fixed', inset: 0, zIndex: 9000,
+          position: 'fixed', inset: 0, zIndex: 9999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'rgba(0,0,0,0.7)',
         }}
@@ -107,6 +112,12 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
         </motion.div>
       </div>
     );
+
+    if (mounted) {
+      const { createPortal } = require('react-dom');
+      return createPortal(overlay, document.body);
+    }
+    return null; // Don't render overlay SSR to avoid hydration bugs with document.body
   }
 
   // ── Normal (3D-anchored) panel ────────────────────────────────
@@ -115,23 +126,25 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
       onPointerDown={handleFocus}
       initial={{ opacity: 0, scale: 0.88, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 22, stiffness: 260 }}
+      transition={{ type: "spring", damping: 22, stiffness: 260 }}
       style={{
         width,
         height,
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'rgba(10, 10, 30, 0.78)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        display: "flex",
+        flexDirection: "column",
+        background: "rgba(10, 10, 30, 0.78)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
         borderRadius: 14,
-        border: '1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.15)',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
-        overflow: 'hidden',
-        color: '#e2e8f0',
-        userSelect: 'none',
-        pointerEvents: 'auto',
-        position: 'relative',
+        border:
+          "1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.15)",
+        boxShadow:
+          "0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+        overflow: "hidden",
+        color: "#e2e8f0",
+        userSelect: "none",
+        pointerEvents: "auto",
+        position: "relative",
       }}
     >
       {/* Drag handle = title bar */}
@@ -140,30 +153,82 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
         onPointerMove={onDragMove}
         onPointerUp={onDragEnd}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 12px',
-          cursor: 'grab',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 12px",
+          cursor: "grab",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
           flexShrink: 0,
-          background: 'rgba(0,0,0,0.2)',
+          background: "rgba(0,0,0,0.2)",
         }}
       >
         {/* macOS dots */}
-        <div style={{ display: 'flex', gap: 6, marginRight: 6 }}>
-          <button onClick={(e) => { e.stopPropagation(); closePanel(id); }} aria-label="Close"
-            style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', border: 'none', cursor: 'pointer' }} />
-          <button onClick={(e) => { e.stopPropagation(); minimizePanel(id); }} aria-label="Minimize"
-            style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b', border: 'none', cursor: 'pointer' }} />
-          <button onClick={(e) => { e.stopPropagation(); maximizePanel(id) ; }} aria-label="Maximize"
-            style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', border: 'none', cursor: 'pointer' }} />
+        <div style={{ display: "flex", gap: 6, marginRight: 6 }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              closePanel(id);
+            }}
+            aria-label="Close"
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "#ef4444",
+              border: "none",
+              cursor: "pointer",
+            }}
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              minimizePanel(id);
+            }}
+            aria-label="Minimize"
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "#f59e0b",
+              border: "none",
+              cursor: "pointer",
+            }}
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              maximizePanel(id);
+            }}
+            aria-label="Maximize"
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "#22c55e",
+              border: "none",
+              cursor: "pointer",
+            }}
+          />
         </div>
         <span style={{ fontSize: 13, opacity: 0.5 }}>{icon}</span>
-        <span style={{ fontSize: 13, fontWeight: 500, opacity: 0.8, fontFamily: 'monospace' }}>{title}</span>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 500,
+            opacity: 0.8,
+            fontFamily: "monospace",
+          }}
+        >
+          {title}
+        </span>
       </div>
 
       {/* Content area */}
-      <div style={{ flex: 1, overflow: 'auto', padding: 16 }}
-        onPointerDown={(e) => e.stopPropagation()}>
+      <div
+        style={{ flex: 1, overflow: "auto", padding: 16 }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         {children}
       </div>
 
@@ -173,21 +238,47 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
         onPointerMove={onResizeMove}
         onPointerUp={onResizeEnd}
         style={{
-          position: 'absolute',
+          position: "absolute",
           bottom: 0,
           right: 0,
           width: 18,
           height: 18,
-          cursor: 'nwse-resize',
-          background: 'transparent',
+          cursor: "nwse-resize",
+          background: "transparent",
           zIndex: 5,
         }}
       >
         {/* Visual grip lines */}
-        <svg width="18" height="18" viewBox="0 0 18 18" style={{ position: 'absolute', bottom: 2, right: 2 }}>
-          <line x1="14" y1="4" x2="4" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
-          <line x1="14" y1="8" x2="8" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
-          <line x1="14" y1="12" x2="12" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 18 18"
+          style={{ position: "absolute", bottom: 2, right: 2 }}
+        >
+          <line
+            x1="14"
+            y1="4"
+            x2="4"
+            y2="14"
+            stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)"
+            strokeWidth="1.5"
+          />
+          <line
+            x1="14"
+            y1="8"
+            x2="8"
+            y2="14"
+            stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)"
+            strokeWidth="1.5"
+          />
+          <line
+            x1="14"
+            y1="12"
+            x2="12"
+            y2="14"
+            stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)"
+            strokeWidth="1.5"
+          />
         </svg>
       </div>
     </motion.div>
@@ -195,17 +286,74 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
 }
 
 // ── Title bar (for maximized mode) ──────────────────────────────
-function TitleBar({ id, title, icon }: { id: PanelId; title: string; icon: string }) {
+function TitleBar({
+  id,
+  title,
+  icon,
+}: {
+  id: PanelId;
+  title: string;
+  icon: string;
+}) {
   const { closePanel, minimizePanel, restorePanel } = usePanelManager();
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0, background: 'rgba(0,0,0,0.2)' }}>
-      <div style={{ display: 'flex', gap: 6, marginRight: 6 }}>
-        <button onClick={() => closePanel(id)} style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', border: 'none', cursor: 'pointer' }} />
-        <button onClick={() => minimizePanel(id)} style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b', border: 'none', cursor: 'pointer' }} />
-        <button onClick={() => restorePanel(id)} style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', border: 'none', cursor: 'pointer' }} />
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 12px",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        flexShrink: 0,
+        background: "rgba(0,0,0,0.2)",
+      }}
+    >
+      <div style={{ display: "flex", gap: 6, marginRight: 6 }}>
+        <button
+          onClick={() => closePanel(id)}
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "#ef4444",
+            border: "none",
+            cursor: "pointer",
+          }}
+        />
+        <button
+          onClick={() => minimizePanel(id)}
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "#f59e0b",
+            border: "none",
+            cursor: "pointer",
+          }}
+        />
+        <button
+          onClick={() => restorePanel(id)}
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: "50%",
+            background: "#22c55e",
+            border: "none",
+            cursor: "pointer",
+          }}
+        />
       </div>
       <span style={{ fontSize: 13, opacity: 0.5 }}>{icon}</span>
-      <span style={{ fontSize: 13, fontWeight: 500, opacity: 0.8, fontFamily: 'monospace' }}>{title}</span>
+      <span
+        style={{
+          fontSize: 13,
+          fontWeight: 500,
+          opacity: 0.8,
+          fontFamily: "monospace",
+        }}
+      >
+        {title}
+      </span>
     </div>
   );
 }

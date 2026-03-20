@@ -25,7 +25,7 @@ interface GuideState {
 
 const defaultSteps: GuideStep[] = [
   {
-    title: "Welcome to Illusion V2",
+    title: "Welcome to Nexus",
     text: "I'm Pratham's digital twin. I'll show you around this immersive spatial workspace.",
     position: [3.5, -1, -2.5],
     rotation: [0, -0.5, 0], // Rotate slightly left to face user

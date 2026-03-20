@@ -23,6 +23,7 @@ export default function ScenePanel({
   zIndex,
 }: ScenePanelProps) {
   if (!visible) return null;
+
   return (
     <group position={position}>
       <Html

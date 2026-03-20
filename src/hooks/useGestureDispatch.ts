@@ -12,6 +12,11 @@ export function useGestureDispatch(getSpatialState: () => SpatialState) {
     isPinching: false,
     isOpenPalm: false,
     palmY: 0,
+    palmX: 0,
+    isDoublePinch: false,
+    pinchDist: 0,
+    isPeaceSign: false,
+    isThumbsUp: false,
   });
 
   useEffect(() => {
@@ -66,26 +71,37 @@ export function useGestureDispatch(getSpatialState: () => SpatialState) {
         }
       }
 
-      // --- OPEN PALM SCROLL ---
-      // Experimental scroll: maps raw vertical hand movement to wheel events
-      const isOpenPalm = state.isOpenPalm;
-      const wasOpenPalm = lastState.current.isOpenPalm;
-      
-      if (isOpenPalm) {
-        if (wasOpenPalm) {
-          const deltaY = (state.handY - lastState.current.palmY) * window.innerHeight;
-          if (Math.abs(deltaY) > 2) {
-             const el = document.elementFromPoint(px, py);
-             if (el) {
-                el.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: deltaY * 2 }));
-             }
-          }
+
+      // --- DOUBLE PINCH (RESIZE) ---
+      if (state.isDoublePinch) {
+        const dx = state.handX - state.hand2X;
+        const dy = state.handY - state.hand2Y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (!lastState.current.isDoublePinch) {
+           lastState.current.pinchDist = dist;
+           window.dispatchEvent(new CustomEvent('gesture-resizestart'));
+        } else {
+           const scale = dist / lastState.current.pinchDist;
+           window.dispatchEvent(new CustomEvent('gesture-resizemove', { detail: { scale } }));
         }
-        lastState.current.palmY = state.handY;
+      } else if (lastState.current.isDoublePinch) {
+        window.dispatchEvent(new CustomEvent('gesture-resizeend'));
       }
+      lastState.current.isDoublePinch = state.isDoublePinch;
+
+      // --- DISCRETE GESTURES ---
+      if (state.isThumbsUp && !lastState.current.isThumbsUp) {
+        window.dispatchEvent(new CustomEvent('gesture-maximize'));
+      }
+      lastState.current.isThumbsUp = state.isThumbsUp;
+
+      if (state.isPeaceSign && !lastState.current.isPeaceSign) {
+        window.dispatchEvent(new CustomEvent('gesture-minimize'));
+      }
+      lastState.current.isPeaceSign = state.isPeaceSign;
 
       lastState.current.isPinching = isPinching;
-      lastState.current.isOpenPalm = isOpenPalm;
 
       frameId = requestAnimationFrame(loop);
     };

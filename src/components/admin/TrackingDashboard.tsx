@@ -96,7 +96,7 @@ export default function TrackingDashboard() {
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
           }}>👁️</div>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#fff' }}>Illusion_V2 Telemetry</h1>
+            <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#fff' }}>Nexus Telemetry</h1>
             <p style={{ fontSize: 11, color: 'var(--accent)', margin: 0, fontFamily: 'JetBrains Mono, monospace' }}>SECRET_HOSPITALITY_PROTOCOL_v0.92</p>
           </div>
         </div>

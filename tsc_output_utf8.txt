@@ -1,0 +1,4 @@
+﻿src/components/3d/SpatialWorkspace.tsx(21,15): error TS2300: Duplicate identifier 'SpatialState'.
+src/components/3d/SpatialWorkspace.tsx(366,10): error TS2300: Duplicate identifier 'SpatialState'.
+src/components/3d/SpatialWorkspace.tsx(431,25): error TS2322: Type '{ children: Element[]; disableNormalPass: true; }' is not assignable to type 'IntrinsicAttributes & EffectComposerProps & RefAttributes<EffectComposer>'.
+  Property 'disableNormalPass' does not exist on type 'IntrinsicAttributes & EffectComposerProps & RefAttributes<EffectComposer>'. Did you mean 'enableNormalPass'?

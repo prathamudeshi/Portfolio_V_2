@@ -26,13 +26,25 @@ export interface SpatialState {
   headZ: number;
   faceDetected: boolean;
   
-  // Hand
+  // Hand 1
   handX: number; // 0 to 1 (normalized to viewport, where 0,0 is top-left)
   handY: number;
   isPointing: boolean;
   isPinching: boolean;
   isOpenPalm: boolean;
   handDetected: boolean;
+
+  // Hand 2
+  hand2X: number; 
+  hand2Y: number;
+  isPinching2: boolean;
+  isOpenPalm2: boolean;
+  hand2Detected: boolean;
+
+  // Multi-hand & Predefined gestures
+  isDoublePinch: boolean;
+  isPeaceSign: boolean;
+  isThumbsUp: boolean;
   
   webcamActive: boolean;
 }
@@ -65,6 +77,8 @@ export function useSpatialTracking() {
   const stateRef = useRef<SpatialState>({
     headX: 0, headY: 0, headZ: 0, faceDetected: false,
     handX: 0.5, handY: 0.5, isPointing: false, isPinching: false, isOpenPalm: false, handDetected: false,
+    hand2X: 0.5, hand2Y: 0.5, isPinching2: false, isOpenPalm2: false, hand2Detected: false,
+    isDoublePinch: false, isPeaceSign: false, isThumbsUp: false,
     webcamActive: false,
   });
   
@@ -75,6 +89,12 @@ export function useSpatialTracking() {
     pinchFrames: 0,       // consecutive frames pinch has been detected
     releasedFrames: 0,    // consecutive frames pinch has NOT been detected
     isPinchLocked: false, // debounced pinch state
+
+    hand2X: 0.5,
+    hand2Y: 0.5,
+    pinchFrames2: 0,
+    releasedFrames2: 0,
+    isPinchLocked2: false,
   });
   
   const [webcamActive, setWebcamActive] = useState(false);
@@ -230,12 +250,13 @@ export function useSpatialTracking() {
         const hands = new HandsClass({
           locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
         });
-        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+        hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         hands.onResults((results: any) => {
           const settings = settingsRef.current;
           if (!settings.handTrackingEnabled) {
             stateRef.current.handDetected = false;
+            stateRef.current.hand2Detected = false;
             stateRef.current.isPinching = false;
             stateRef.current.isPointing = false;
             stateRef.current.isOpenPalm = false;
@@ -244,76 +265,120 @@ export function useSpatialTracking() {
           }
 
           if (results.multiHandLandmarks?.length > 0) {
-            const lm = results.multiHandLandmarks[0];
             const sm = smoothRef.current;
-            
-            // ── Raw position ──
-            const rawX = 1 - lm[8].x;
-            const rawY = lm[8].y;
-            
-            // ── EMA Smoothing ──
             const alpha = settings.handSmoothingFactor; // lower = smoother
+
+            // ── Hand 1 Process ──
+            const lm1 = results.multiHandLandmarks[0];
+            const rawX = 1 - lm1[8].x;
+            const rawY = lm1[8].y;
+            
             const newX = ema(rawX, sm.handX, alpha);
             const newY = ema(rawY, sm.handY, alpha);
-            
-            // ── Dead zone filter ──
             if (Math.abs(newX - sm.handX) > DEAD_ZONE || Math.abs(newY - sm.handY) > DEAD_ZONE) {
-              sm.handX = newX;
-              sm.handY = newY;
+              sm.handX = newX; sm.handY = newY;
             }
-            
             stateRef.current.handX = sm.handX;
             stateRef.current.handY = sm.handY;
 
-            // ── Pinch with hysteresis + debouncing ──
-            const pinchDist = distance(lm[4], lm[8]);
+            // Pinch 1
+            const pinchDist = distance(lm1[4], lm1[8]);
             const rawPinch = pinchDist < settings.pinchThreshold;
             const rawRelease = pinchDist > settings.pinchReleaseThreshold;
             
-            if (rawPinch) {
-              sm.pinchFrames++;
-              sm.releasedFrames = 0;
-            } else {
-              sm.releasedFrames++;
-              if (rawRelease) sm.pinchFrames = 0;
-            }
+            if (rawPinch) { sm.pinchFrames++; sm.releasedFrames = 0; }
+            else { sm.releasedFrames++; if (rawRelease) sm.pinchFrames = 0; }
             
-            // Debounce: require N consecutive frames to enter/exit pinch
-            if (!sm.isPinchLocked && sm.pinchFrames >= settings.pinchDebounceFrames) {
-              sm.isPinchLocked = true;
-            } else if (sm.isPinchLocked && sm.releasedFrames >= 2) {
-              sm.isPinchLocked = false;
-            }
+            if (!sm.isPinchLocked && sm.pinchFrames >= settings.pinchDebounceFrames) sm.isPinchLocked = true;
+            else if (sm.isPinchLocked && sm.releasedFrames >= 2) sm.isPinchLocked = false;
             
             stateRef.current.isPinching = sm.isPinchLocked;
 
             // Fingers distance from wrist (0) compared to their MCP joints
-            const indexExt = distance(lm[8], lm[0]) > distance(lm[5], lm[0]);
-            const middleExt = distance(lm[12], lm[0]) > distance(lm[9], lm[0]);
-            const ringExt = distance(lm[16], lm[0]) > distance(lm[13], lm[0]);
-            const pinkyExt = distance(lm[20], lm[0]) > distance(lm[17], lm[0]);
+            const indexExt = distance(lm1[8], lm1[0]) > distance(lm1[5], lm1[0]);
+            const middleExt = distance(lm1[12], lm1[0]) > distance(lm1[9], lm1[0]);
+            const ringExt = distance(lm1[16], lm1[0]) > distance(lm1[13], lm1[0]);
+            const pinkyExt = distance(lm1[20], lm1[0]) > distance(lm1[17], lm1[0]);
+            // Thumb is slightly different
+            const thumbExt = distance(lm1[4], lm1[0]) > distance(lm1[2], lm1[0]) + 0.05;
 
-            // Pointing: Index extended, Middle, Ring, Pinky curled
             stateRef.current.isPointing = indexExt && !middleExt && !ringExt && !pinkyExt;
-
-            // Open Palm: All four extended
             stateRef.current.isOpenPalm = indexExt && middleExt && ringExt && pinkyExt && !stateRef.current.isPinching;
+            
+            // New gestures
+            stateRef.current.isPeaceSign = indexExt && middleExt && !ringExt && !pinkyExt && !stateRef.current.isPinching;
+            stateRef.current.isThumbsUp = thumbExt && !indexExt && !middleExt && !ringExt && !pinkyExt;
 
             if (!stateRef.current.handDetected) {
               stateRef.current.handDetected = true;
               setHandDetected(true);
             }
+
+            // ── Hand 2 Process ──
+            if (results.multiHandLandmarks.length > 1) {
+              const lm2 = results.multiHandLandmarks[1];
+              const rawX2 = 1 - lm2[8].x;
+              const rawY2 = lm2[8].y;
+              
+              const newX2 = ema(rawX2, sm.hand2X, alpha);
+              const newY2 = ema(rawY2, sm.hand2Y, alpha);
+              if (Math.abs(newX2 - sm.hand2X) > DEAD_ZONE || Math.abs(newY2 - sm.hand2Y) > DEAD_ZONE) {
+                sm.hand2X = newX2; sm.hand2Y = newY2;
+              }
+              stateRef.current.hand2X = sm.hand2X;
+              stateRef.current.hand2Y = sm.hand2Y;
+
+              const pinchDist2 = distance(lm2[4], lm2[8]);
+              const rawPinch2 = pinchDist2 < settings.pinchThreshold;
+              const rawRelease2 = pinchDist2 > settings.pinchReleaseThreshold;
+              
+              if (rawPinch2) { sm.pinchFrames2++; sm.releasedFrames2 = 0; }
+              else { sm.releasedFrames2++; if (rawRelease2) sm.pinchFrames2 = 0; }
+              
+              if (!sm.isPinchLocked2 && sm.pinchFrames2 >= settings.pinchDebounceFrames) sm.isPinchLocked2 = true;
+              else if (sm.isPinchLocked2 && sm.releasedFrames2 >= 2) sm.isPinchLocked2 = false;
+              
+              stateRef.current.isPinching2 = sm.isPinchLocked2;
+
+              const indexExt2 = distance(lm2[8], lm2[0]) > distance(lm2[5], lm2[0]);
+              const middleExt2 = distance(lm2[12], lm2[0]) > distance(lm2[9], lm2[0]);
+              const ringExt2 = distance(lm2[16], lm2[0]) > distance(lm2[13], lm2[0]);
+              const pinkyExt2 = distance(lm2[20], lm2[0]) > distance(lm2[17], lm2[0]);
+              
+              stateRef.current.isOpenPalm2 = indexExt2 && middleExt2 && ringExt2 && pinkyExt2 && !stateRef.current.isPinching2;
+              
+              stateRef.current.hand2Detected = true;
+            } else {
+              stateRef.current.hand2Detected = false;
+              stateRef.current.isPinching2 = false;
+              stateRef.current.isOpenPalm2 = false;
+              sm.isPinchLocked2 = false;
+              sm.pinchFrames2 = 0;
+              sm.releasedFrames2 = 0;
+            }
+
+            // ── Combined Gestures ──
+            stateRef.current.isDoublePinch = stateRef.current.isPinching && stateRef.current.isPinching2;
+
           } else {
             // Hand lost — reset smooth state
             if (stateRef.current.handDetected) {
               stateRef.current.handDetected = false;
               setHandDetected(false);
-              smoothRef.current.isPinchLocked = false;
-              smoothRef.current.pinchFrames = 0;
-              smoothRef.current.releasedFrames = 0;
+              stateRef.current.hand2Detected = false;
+              
+              const sm = smoothRef.current;
+              sm.isPinchLocked = false;
+              sm.pinchFrames = 0;
+              sm.releasedFrames = 0;
+
+              sm.isPinchLocked2 = false;
+              sm.pinchFrames2 = 0;
+              sm.releasedFrames2 = 0;
             }
           }
         });
+
 
         if (cleanup) return;
 
