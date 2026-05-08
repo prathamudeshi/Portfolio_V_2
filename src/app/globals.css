@@ -1,0 +1,594 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* ── Theme System ────────────────────────────────────────────── */
+:root,
+[data-theme="indigo"] {
+  /* Legacy accent (used by hero glass UI) */
+  --background: #05050f;
+  --foreground: #e2e8f0;
+  --accent: #818cf8;
+  --accent-mid: #6366f1;
+  --accent-deep: #4f46e5;
+  --accent-r: 129;
+  --accent-g: 140;
+  --accent-b: 248;
+
+  /* ── Hero glassmorphism tokens (unchanged) ── */
+  --ios-blur: blur(30px);
+  --ios-radius: 20px;
+  --ios-radius-inner: 12px;
+  --ios-border: 1px solid rgba(255, 255, 255, 0.12);
+  --ios-bg: rgba(10, 10, 30, 0.65);
+
+  /* ── Material 3 Dark Scheme ── */
+  /* Reference palette (Indigo seed) */
+  --md-primary:          #b0b8ff;   /* primary-80 */
+  --md-on-primary:       #1a1b6e;   /* primary-20 */
+  --md-primary-container: #3031a1;  /* primary-30 */
+  --md-on-primary-container: #e0e1ff; /* primary-90 */
+
+  --md-secondary:        #c3c5dd;   /* secondary-80 */
+  --md-on-secondary:     #2c2d42;   /* secondary-20 */
+  --md-secondary-container: #43455b; /* secondary-30 */
+  --md-on-secondary-container: #e0e1f9; /* secondary-90 */
+
+  --md-tertiary:         #e6bad5;   /* tertiary-80 */
+  --md-on-tertiary:      #44273a;   /* tertiary-20 */
+  --md-tertiary-container: #5c3f51; /* tertiary-30 */
+  --md-on-tertiary-container: #ffd8ef; /* tertiary-90 */
+
+  --md-error:            #ffb4ab;
+  --md-on-error:         #690005;
+  --md-error-container:  #93000a;
+  --md-on-error-container: #ffdad6;
+
+  /* Surfaces (dark scheme) */
+  --md-surface:              #11111b;   /* dark base */
+  --md-on-surface:           #e4e1ec;
+  --md-surface-variant:      #1c1b2e;
+  --md-on-surface-variant:   #c5c4d9;
+  --md-surface-container:    #18182a;
+  --md-surface-container-low: #141424;
+  --md-surface-container-high: #222235;
+  --md-surface-container-highest: #2d2d42;
+  --md-inverse-surface:      #e4e1ec;
+  --md-inverse-on-surface:   #302f45;
+  --md-outline:              #8f8daa;
+  --md-outline-variant:      #45445f;
+
+  /* M3 Shape scale */
+  --md-shape-none:       0px;
+  --md-shape-xs:         4px;
+  --md-shape-sm:         8px;
+  --md-shape-md:         12px;
+  --md-shape-lg:         16px;
+  --md-shape-xl:         28px;
+  --md-shape-full:       9999px;
+
+  /* M3 Elevation tonal overlays (indigo ~5% per level) */
+  --md-elev-1: rgba(176, 184, 255, 0.05);
+  --md-elev-2: rgba(176, 184, 255, 0.08);
+  --md-elev-3: rgba(176, 184, 255, 0.11);
+  --md-elev-4: rgba(176, 184, 255, 0.12);
+  --md-elev-5: rgba(176, 184, 255, 0.14);
+
+  /* M3 Typography scale */
+  --md-font-display:    'Outfit', 'Inter', system-ui, sans-serif;
+  --md-font-body:       'Inter', 'Outfit', system-ui, sans-serif;
+  --md-font-mono:       'JetBrains Mono', 'Geist Mono', monospace;
+
+  /* State layer opacities */
+  --md-state-hover:   0.08;
+  --md-state-focus:   0.12;
+  --md-state-pressed: 0.12;
+  --md-state-dragged: 0.16;
+}
+
+[data-theme="emerald"] {
+  --accent: #34d399;
+  --accent-mid: #10b981;
+  --accent-deep: #059669;
+  --accent-r: 52;
+  --accent-g: 211;
+  --accent-b: 153;
+
+  /* Material 3 Emerald Scheme */
+  --md-primary:          #6edbab;
+  --md-on-primary:       #003823;
+  --md-primary-container: #005234;
+  --md-on-primary-container: #8af8c6;
+  --md-secondary:        #b5ccba;
+  --md-on-secondary:     #213528;
+  --md-secondary-container: #374b3e;
+  --md-on-secondary-container: #d1e8d6;
+  --md-tertiary:         #b2ccde;
+  --md-on-tertiary:      #1b3342;
+  --md-tertiary-container: #324a5a;
+  --md-on-tertiary-container: #cde8fb;
+}
+
+[data-theme="rose"] {
+  --accent: #fb7185;
+  --accent-mid: #f43f5e;
+  --accent-deep: #e11d48;
+  --accent-r: 251;
+  --accent-g: 113;
+  --accent-b: 133;
+
+  /* Material 3 Rose Scheme */
+  --md-primary:          #ffb1c8;
+  --md-on-primary:       #5e1133;
+  --md-primary-container: #7e2a49;
+  --md-on-primary-container: #ffd9e2;
+  --md-secondary:        #e5bdbd;
+  --md-on-secondary:     #44292a;
+  --md-secondary-container: #5d3f40;
+  --md-on-secondary-container: #ffdada;
+  --md-tertiary:         #efbd94;
+  --md-on-tertiary:      #48290c;
+  --md-tertiary-container: #623f20;
+  --md-on-tertiary-container: #ffddc3;
+}
+
+[data-theme="amber"] {
+  --accent: #fbbf24;
+  --accent-mid: #f59e0b;
+  --accent-deep: #d97706;
+  --accent-r: 251;
+  --accent-g: 191;
+  --accent-b: 36;
+
+  /* Material 3 Amber Scheme */
+  --md-primary:          #ffba28;
+  --md-on-primary:       #442b00;
+  --md-primary-container: #623f00;
+  --md-on-primary-container: #ffdf9e;
+  --md-secondary:        #dbc38c;
+  --md-on-secondary:     #3d2e04;
+  --md-secondary-container: #56441a;
+  --md-on-secondary-container: #f8dfa6;
+  --md-tertiary:         #b8cc98;
+  --md-on-tertiary:      #24350e;
+  --md-tertiary-container: #3a4c22;
+  --md-on-tertiary-container: #d4e8b2;
+}
+
+[data-theme="cyan"] {
+  --accent: #22d3ee;
+  --accent-mid: #06b6d4;
+  --accent-deep: #0891b2;
+  --accent-r: 34;
+  --accent-g: 211;
+  --accent-b: 238;
+
+  /* Material 3 Cyan Scheme */
+  --md-primary:          #4fd8eb;
+  --md-on-primary:       #00363d;
+  --md-primary-container: #004f58;
+  --md-on-primary-container: #97f0ff;
+  --md-secondary:        #b0cccf;
+  --md-on-secondary:     #1b3538;
+  --md-secondary-container: #324b4e;
+  --md-on-secondary-container: #cce8eb;
+  --md-tertiary:         #cfc0e8;
+  --md-on-tertiary:      #362b4b;
+  --md-tertiary-container: #4d4163;
+  --md-on-tertiary-container: #ebd9ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  background-image:
+    radial-gradient(ellipse at 30% 40%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 60%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 50% 50%, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.03) 0%, transparent 70%);
+  color: var(--md-on-surface);
+  font-family: var(--md-font-body);
+  transition: background 0.5s ease, color 0.5s ease;
+  /* NOTE: overflow: hidden removed — scrolling is needed for portfolio sections */
+}
+
+/* Subtle noise grain overlay for texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.35);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.3);
+  color: #f1f5f9;
+}
+
+/* Focus outlines */
+:focus-visible {
+  outline: 2px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.5);
+  outline-offset: 2px;
+}
+
+/* ── iOS UI Components (hero only — untouched) ─────────────── */
+.glass-ios {
+  background: var(--ios-bg);
+  backdrop-filter: var(--ios-blur);
+  -webkit-backdrop-filter: var(--ios-blur);
+  border: var(--ios-border);
+  border-radius: var(--ios-radius);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.ios-pill {
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Material 3 Component Utilities ────────────────────────── */
+
+/* M3 Top App Bar */
+.m3-top-app-bar {
+  background: var(--md-surface-container);
+  border-bottom: 1px solid var(--md-outline-variant);
+  font-family: var(--md-font-display);
+}
+
+/* M3 Card variants */
+.m3-card-elevated {
+  background: var(--md-surface-container-low);
+  background-image: linear-gradient(
+    var(--md-elev-1), var(--md-elev-1)
+  );
+  border-radius: var(--md-shape-xl);
+  border: 1px solid var(--md-outline-variant);
+  box-shadow: 
+    0 1px 3px rgba(0,0,0,0.4), 
+    0 4px 8px rgba(0,0,0,0.2),
+    0 0 0 1px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.05);
+  transition: box-shadow 0.25s ease, background-image 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.m3-card-elevated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(176, 184, 255, 0);
+  transition: background 0.2s ease;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+.m3-card-elevated:hover {
+  box-shadow: 
+    0 8px 24px rgba(0,0,0,0.5), 
+    0 12px 40px rgba(0,0,0,0.25),
+    0 0 15px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.15);
+  border-color: rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.3);
+}
+.m3-card-elevated:hover::before {
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), calc(var(--md-state-hover) * 0.7));
+}
+
+.m3-card-filled {
+  background: var(--md-surface-container-highest);
+  border-radius: var(--md-shape-xl);
+  border: none;
+  box-shadow: none;
+  transition: background 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.m3-card-filled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(176, 184, 255, 0);
+  transition: background 0.2s ease;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+.m3-card-filled:hover::before {
+  background: rgba(var(--accent-r), var(--accent-g), var(--accent-b), var(--md-state-hover));
+}
+
+/* M3 Text Field (Filled style) */
+.m3-text-field {
+  background: var(--md-surface-container-highest);
+  border: none;
+  border-bottom: 1px solid var(--md-outline);
+  border-radius: var(--md-shape-xs) var(--md-shape-xs) 0 0;
+  padding: 20px 16px 8px;
+  color: var(--md-on-surface);
+  font-family: var(--md-font-body);
+  font-size: 16px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s, background 0.2s;
+}
+.m3-text-field::placeholder {
+  color: var(--md-on-surface-variant);
+  font-size: 14px;
+}
+.m3-text-field:focus {
+  border-bottom: 2px solid var(--md-primary);
+  background: var(--md-surface-container-high);
+}
+
+/* M3 Chip (Assist/Filter style) */
+.m3-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--md-shape-sm);
+  border: 1px solid var(--md-outline);
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font-family: var(--md-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.m3-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(176, 184, 255, 0);
+  transition: background 0.15s;
+  pointer-events: none;
+}
+.m3-chip:hover::before {
+  background: rgba(176, 184, 255, var(--md-state-hover));
+}
+.m3-chip.tonal {
+  background: var(--md-secondary-container);
+  border-color: transparent;
+  color: var(--md-on-secondary-container);
+}
+
+/* M3 Filled Button */
+.m3-btn-filled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  font-family: var(--md-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.m3-btn-filled::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background 0.15s;
+  pointer-events: none;
+}
+.m3-btn-filled:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.m3-btn-filled:hover::before {
+  background: rgba(255,255,255, var(--md-state-hover));
+}
+.m3-btn-filled:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* M3 Label / Overline typography */
+.m3-label-sm {
+  font-family: var(--md-font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  color: var(--md-on-surface-variant);
+  text-transform: uppercase;
+}
+.m3-label-md {
+  font-family: var(--md-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  color: var(--md-on-surface-variant);
+}
+.m3-title-lg {
+  font-family: var(--md-font-display);
+  font-size: clamp(32px, 5vw, 57px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  color: var(--md-on-surface);
+}
+.m3-title-md {
+  font-family: var(--md-font-display);
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 600;
+  letter-spacing: -0.25px;
+  color: var(--md-on-surface);
+}
+.m3-body-lg {
+  font-family: var(--md-font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--md-on-surface-variant);
+}
+.m3-body-md {
+  font-family: var(--md-font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--md-on-surface-variant);
+}
+
+/* M3 Divider */
+.m3-divider {
+  height: 1px;
+  background: var(--md-outline-variant);
+  border: none;
+}
+
+/* M3 Section background override */
+.m3-section {
+  background: var(--md-surface);
+  position: relative;
+}
+
+
+/* ── Portfolio Section Utilities (from Portfolio/src/index.css) ── */
+.hash-span {
+  margin-top: -100px;
+  padding-bottom: 100px;
+  display: block;
+}
+
+.black-gradient {
+  background: linear-gradient(to right, #434343, #000000);
+}
+
+.violet-gradient {
+  background: linear-gradient(-90deg, #804dee 0%, rgba(60, 51, 80, 0) 100%);
+}
+
+.green-pink-gradient {
+  background: linear-gradient(90.13deg, #00cea8 1.9%, #bf61ff 97.5%);
+}
+
+.orange-text-gradient {
+  background: linear-gradient(to top, #f12711, #f5af19);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.green-text-gradient {
+  background: linear-gradient(to top, #11998e, #38ef7d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.blue-text-gradient {
+  background: linear-gradient(to top, #2f80ed, #56ccf2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pink-text-gradient {
+  background: linear-gradient(to top, #ec008c, #fc6767);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Portfolio section background — now M3 surface */
+.portfolio-section {
+  background: var(--md-surface);
+  position: relative;
+}
+
+/* Starfield canvas loader */
+.canvas-loader {
+  font-size: 10px;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  position: relative;
+  text-indent: -9999em;
+  animation: mulShdSpin 1.1s infinite ease;
+  transform: translateZ(0);
+}
+
+@keyframes mulShdSpin {
+  0%, 100% {
+    box-shadow: 0em -2.6em 0em 0em #ffffff,
+      1.8em -1.8em 0 0em rgba(255,255,255,0.2), 2.5em 0em 0 0em rgba(255,255,255,0.2),
+      1.75em 1.75em 0 0em rgba(255,255,255,0.2), 0em 2.5em 0 0em rgba(255,255,255,0.2),
+      -1.8em 1.8em 0 0em rgba(255,255,255,0.2), -2.6em 0em 0 0em rgba(255,255,255,0.5),
+      -1.8em -1.8em 0 0em rgba(255,255,255,0.7);
+  }
+  12.5% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.7), 1.8em -1.8em 0 0em #ffffff, 2.5em 0em 0 0em rgba(255,255,255,0.2), 1.75em 1.75em 0 0em rgba(255,255,255,0.2), 0em 2.5em 0 0em rgba(255,255,255,0.2), -1.8em 1.8em 0 0em rgba(255,255,255,0.2), -2.6em 0em 0 0em rgba(255,255,255,0.2), -1.8em -1.8em 0 0em rgba(255,255,255,0.5); }
+  25% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.5), 1.8em -1.8em 0 0em rgba(255,255,255,0.7), 2.5em 0em 0 0em #ffffff, 1.75em 1.75em 0 0em rgba(255,255,255,0.2), 0em 2.5em 0 0em rgba(255,255,255,0.2), -1.8em 1.8em 0 0em rgba(255,255,255,0.2), -2.6em 0em 0 0em rgba(255,255,255,0.2), -1.8em -1.8em 0 0em rgba(255,255,255,0.2); }
+  37.5% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.2), 1.8em -1.8em 0 0em rgba(255,255,255,0.5), 2.5em 0em 0 0em rgba(255,255,255,0.7), 1.75em 1.75em 0 0em #ffffff, 0em 2.5em 0 0em rgba(255,255,255,0.2), -1.8em 1.8em 0 0em rgba(255,255,255,0.2), -2.6em 0em 0 0em rgba(255,255,255,0.2), -1.8em -1.8em 0 0em rgba(255,255,255,0.2); }
+  50% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.2), 1.8em -1.8em 0 0em rgba(255,255,255,0.2), 2.5em 0em 0 0em rgba(255,255,255,0.5), 1.75em 1.75em 0 0em rgba(255,255,255,0.7), 0em 2.5em 0 0em #ffffff, -1.8em 1.8em 0 0em rgba(255,255,255,0.2), -2.6em 0em 0 0em rgba(255,255,255,0.2), -1.8em -1.8em 0 0em rgba(255,255,255,0.2); }
+  62.5% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.2), 1.8em -1.8em 0 0em rgba(255,255,255,0.2), 2.5em 0em 0 0em rgba(255,255,255,0.2), 1.75em 1.75em 0 0em rgba(255,255,255,0.5), 0em 2.5em 0 0em rgba(255,255,255,0.7), -1.8em 1.8em 0 0em #ffffff, -2.6em 0em 0 0em rgba(255,255,255,0.2), -1.8em -1.8em 0 0em rgba(255,255,255,0.2); }
+  75% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.2), 1.8em -1.8em 0 0em rgba(255,255,255,0.2), 2.5em 0em 0 0em rgba(255,255,255,0.2), 1.75em 1.75em 0 0em rgba(255,255,255,0.2), 0em 2.5em 0 0em rgba(255,255,255,0.5), -1.8em 1.8em 0 0em rgba(255,255,255,0.7), -2.6em 0em 0 0em #ffffff, -1.8em -1.8em 0 0em rgba(255,255,255,0.2); }
+  87.5% { box-shadow: 0em -2.6em 0em 0em rgba(255,255,255,0.2), 1.8em -1.8em 0 0em rgba(255,255,255,0.2), 2.5em 0em 0 0em rgba(255,255,255,0.2), 1.75em 1.75em 0 0em rgba(255,255,255,0.2), 0em 2.5em 0 0em rgba(255,255,255,0.2), -1.8em 1.8em 0 0em rgba(255,255,255,0.5), -2.6em 0em 0 0em rgba(255,255,255,0.7), -1.8em -1.8em 0 0em #ffffff; }
+}
+
+/* ── Performance: GPU compositing hints ─────────────────────────── */
+
+/* Promote M3 cards to compositor layer before scroll-triggered animations start */
+.m3-card-elevated,
+.m3-card-filled {
+  will-change: transform;
+}
+
+/* contain prevents layout recalculation propagating up when children animate */
+.portfolio-section {
+  contain: layout style;
+}

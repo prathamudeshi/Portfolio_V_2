@@ -1,0 +1,16 @@
+{
+  "name": "Pratham Udeshi — Nexus Portfolio",
+  "short_name": "Nexus",
+  "description": "Spatial computing portfolio of Pratham Udeshi, AI Engineer.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05050f",
+  "theme_color": "#818cf8",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
