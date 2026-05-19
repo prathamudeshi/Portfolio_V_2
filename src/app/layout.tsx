@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import CookieConsent from "@/components/ui/CookieConsent";
-// import AnalyticsProvider from "@/components/AnalyticsProvider";
+import AnalyticsProvider from "@/components/AnalyticsProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://prathamudeshi.com"),
   title: "Pratham Udeshi — AI Engineer | Nexus Portfolio",
   description:
     "Explore the spatial computing portfolio of Pratham Udeshi. Specialized in AI Engineering, Computer Vision, Agentic AI, and Full-Stack Development. Creator of Nexus and Amethyst AI Platform.",
@@ -112,7 +113,7 @@ export default function RootLayout({
           key="jsonld"
         />
         {children}
-        {/* <AnalyticsProvider /> */}
+        <AnalyticsProvider />
         <CookieConsent />
       </body>
     </html>

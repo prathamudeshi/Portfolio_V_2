@@ -20,16 +20,18 @@ export function tintRobotMaterials(scene: THREE.Object3D, accent: string) {
       if (Array.isArray(material)) {
         material.forEach((entry) => {
           if ('emissive' in entry) {
-            entry.emissive = new THREE.Color(accent);
-            entry.emissiveIntensity = 0.5;
+            const mat = entry as THREE.MeshStandardMaterial;
+            mat.emissive = new THREE.Color(accent);
+            mat.emissiveIntensity = 0.5;
           }
         });
         return;
       }
 
       if ('emissive' in material) {
-        material.emissive = new THREE.Color(accent);
-        material.emissiveIntensity = 0.5;
+        const mat = material as THREE.MeshStandardMaterial;
+        mat.emissive = new THREE.Color(accent);
+        mat.emissiveIntensity = 0.5;
       }
     }
   });
