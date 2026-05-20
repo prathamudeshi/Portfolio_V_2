@@ -57,7 +57,7 @@ const defaults = {
   cursorSize: 16,
   faceTrackingEnabled: true,
   faceSensitivity: 1.0,
-  showWebcam: false,
+  showWebcam: true,
   webcamOpacity: 0.7,
   showStatusOverlay: true,
   isFullscreen: false,

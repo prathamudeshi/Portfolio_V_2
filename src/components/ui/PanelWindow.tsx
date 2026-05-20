@@ -27,9 +27,27 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
   const handleFocus = useCallback(() => focusPanel(id), [focusPanel, id]);
 
   const [mounted, setMounted] = useState(false);
+  const [isMobileLandscape, setIsMobileLandscape] = useState(false);
+
   useEffect(() => {
     setMounted(true);
+    const check = () => {
+      setIsMobileLandscape(
+        window.innerHeight <= 500 && window.innerWidth > window.innerHeight
+      );
+    };
+    check();
+    window.addEventListener('resize', check);
+    window.addEventListener('orientationchange', check);
+    return () => {
+      window.removeEventListener('resize', check);
+      window.removeEventListener('orientationchange', check);
+    };
   }, []);
+
+  // On mobile landscape, clamp panel size to be readable
+  const displayWidth  = isMobileLandscape ? Math.max(width,  Math.round(window.innerWidth  * 0.78)) : width;
+  const displayHeight = isMobileLandscape ? Math.max(height, Math.round(window.innerHeight * 0.72)) : height;
 
   // ── Drag state ──────────────────────────────────────────────
   const dragRef = useRef<{ startX: number; startY: number } | null>(null);
@@ -78,6 +96,80 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
   }, []);
 
   if (!panel.isOpen || panel.isMinimized) return null;
+
+  // isMobileLandscape is kept for the resize handle size only — no overlay branch
+  if (false) {
+    const mobileOverlay = (
+      <div
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9990,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
+        }}
+        onClick={() => closePanel(id)}
+      >
+        <motion.div
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.92, opacity: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: '94vw', height: '88vh',
+            display: 'flex', flexDirection: 'column',
+            background: 'rgba(10, 10, 30, 0.94)',
+            backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+            borderRadius: 16,
+            border: '1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.2)',
+            boxShadow: '0 12px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+            overflow: 'hidden', color: '#e2e8f0',
+          }}
+        >
+          {/* Title bar with close button — no drag on mobile */}
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '10px 14px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              flexShrink: 0,
+              background: 'rgba(0,0,0,0.25)',
+            }}
+          >
+            <div style={{ display: 'flex', gap: 6, marginRight: 6 }}>
+              <button
+                onClick={() => closePanel(id)}
+                aria-label="Close"
+                style={{ width: 14, height: 14, borderRadius: '50%', background: '#ef4444', border: 'none', cursor: 'pointer' }}
+              />
+              <button
+                onClick={() => minimizePanel(id)}
+                aria-label="Minimize"
+                style={{ width: 14, height: 14, borderRadius: '50%', background: '#f59e0b', border: 'none', cursor: 'pointer' }}
+              />
+              <button
+                onClick={() => maximizePanel(id)}
+                aria-label="Maximize"
+                style={{ width: 14, height: 14, borderRadius: '50%', background: '#22c55e', border: 'none', cursor: 'pointer' }}
+              />
+            </div>
+            <span style={{ fontSize: 15, opacity: 0.6 }}>{icon}</span>
+            <span style={{ fontSize: 14, fontWeight: 600, opacity: 0.9, fontFamily: 'monospace' }}>{title}</span>
+          </div>
+          <div style={{ flex: 1, overflow: 'auto', padding: '16px 18px', fontSize: 14 }}>
+            {children}
+          </div>
+        </motion.div>
+      </div>
+    );
+
+    if (mounted) {
+      const { createPortal } = require('react-dom');
+      return createPortal(mobileOverlay, document.body);
+    }
+    return null;
+  }
 
   // ── Maximized overlay ─────────────────────────────────────────
   if (panel.isMaximized) {
@@ -161,6 +253,7 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
           borderBottom: "1px solid rgba(255,255,255,0.06)",
           flexShrink: 0,
           background: "rgba(0,0,0,0.2)",
+          touchAction: "none",
         }}
       >
         {/* macOS dots */}
@@ -246,39 +339,18 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
           cursor: "nwse-resize",
           background: "transparent",
           zIndex: 5,
+          touchAction: "none",
         }}
       >
-        {/* Visual grip lines */}
         <svg
           width="18"
           height="18"
           viewBox="0 0 18 18"
           style={{ position: "absolute", bottom: 2, right: 2 }}
         >
-          <line
-            x1="14"
-            y1="4"
-            x2="4"
-            y2="14"
-            stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)"
-            strokeWidth="1.5"
-          />
-          <line
-            x1="14"
-            y1="8"
-            x2="8"
-            y2="14"
-            stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)"
-            strokeWidth="1.5"
-          />
-          <line
-            x1="14"
-            y1="12"
-            x2="12"
-            y2="14"
-            stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)"
-            strokeWidth="1.5"
-          />
+          <line x1="14" y1="4" x2="4" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
+          <line x1="14" y1="8" x2="8" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
+          <line x1="14" y1="12" x2="12" y2="14" stroke="rgba(var(--accent-r),var(--accent-g),var(--accent-b),0.3)" strokeWidth="1.5" />
         </svg>
       </div>
     </motion.div>

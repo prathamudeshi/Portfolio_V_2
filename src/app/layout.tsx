@@ -112,6 +112,21 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           key="jsonld"
         />
+        {/* ── Mobile landscape-only overlay ── */}
+        <div className="rotate-overlay" aria-live="polite" role="alert">
+          <div style={{ position: 'relative', width: 80, height: 80 }}>
+            <div className="rotate-overlay__ring" />
+            <svg className="rotate-overlay__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+              <line x1="12" y1="18" x2="12.01" y2="18" />
+              <path d="M8 2v1a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V2" />
+            </svg>
+          </div>
+          <p className="rotate-overlay__title">Rotate Your Device</p>
+          <p className="rotate-overlay__sub">
+            Nexus is designed for landscape mode. Please rotate your phone sideways for the full experience.
+          </p>
+        </div>
         {children}
         <AnalyticsProvider />
         <CookieConsent />

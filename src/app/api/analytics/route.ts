@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
+import { ObjectId } from "mongodb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,3 +68,29 @@ export async function GET() {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const data = await req.json();
+    const { ids } = data;
+    if (!ids || !Array.isArray(ids)) {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
+
+    const { db } = await connectToDatabase();
+    const objectIds = ids.map((id: string) => new ObjectId(id));
+
+    await db.collection("tracking_snapshots").deleteMany({
+      _id: { $in: objectIds },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[API Analytics DELETE] Error:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
+}
+

@@ -169,39 +169,44 @@ export default function Dock() {
     currentTheme === initialTheme;
 
   return (
-    <motion.div
-      onMouseMove={(e) => mouseX.set(e.pageX)}
-      onMouseLeave={() => mouseX.set(Infinity)}
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.5, type: "spring", damping: 20 }}
+    <div
       style={{
         position: "fixed",
-        bottom: 12,
-        left: "40%",
+        bottom: 10,
+        left: "50%",
         transform: "translateX(-50%)",
         zIndex: 1000,
-        display: "flex",
-        gap: 6,
-        padding: "6px 10px",
-        borderRadius: 18,
-        background: "rgba(10, 10, 30, 0.7)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12)",
-        boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
-        alignItems: "flex-end",
       }}
     >
-      {dockItems.map((item) => (
-        <DockIcon
-          key={item.id}
-          item={item}
-          mouseX={mouseX}
-          onActivate={handleActivate}
-          highlightTheme={showThemeSpotlight && item.id === "settings"}
-        />
-      ))}
-    </motion.div>
+      <motion.div
+        onMouseMove={(e) => mouseX.set(e.pageX)}
+        onMouseLeave={() => mouseX.set(Infinity)}
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, type: "spring", damping: 20 }}
+        style={{
+          display: "flex",
+          gap: 5,
+          padding: "5px 8px",
+          borderRadius: 16,
+          background: "rgba(10, 10, 30, 0.75)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.12)",
+          boxShadow: "0 8px 30px rgba(0, 0, 0, 0.4)",
+          alignItems: "flex-end",
+        }}
+      >
+        {dockItems.map((item) => (
+          <DockIcon
+            key={item.id}
+            item={item}
+            mouseX={mouseX}
+            onActivate={handleActivate}
+            highlightTheme={showThemeSpotlight && item.id === "settings"}
+          />
+        ))}
+      </motion.div>
+    </div>
   );
 }

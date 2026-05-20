@@ -37,7 +37,7 @@ interface PanelManagerState {
 }
 
 const defaultPanels: Record<PanelId, PanelState> = {
-  terminal:   { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 2, position: [  0,    0.2, -3  ], size: [520, 340] },
+  terminal:   { isOpen: true, isMinimized: false, isMaximized: false, zIndex: 2, position: [  0,    0.2, -3  ], size: [520, 340] },
   about:      { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 1, position: [ -3.2,  1.2, -4  ], size: [360, 400] },
   experience: { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 3, position: [  3.2,  1.0, -4.5], size: [480, 420] },
   projects:   { isOpen: false, isMinimized: false, isMaximized: false, zIndex: 4, position: [  0,   -1.5, -5  ], size: [560, 440] },

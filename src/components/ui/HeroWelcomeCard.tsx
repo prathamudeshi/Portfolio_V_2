@@ -99,28 +99,32 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.94, y: 24 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: -16 }}
+      initial={{ opacity: 0, scale: 0.94 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.55, ease: [0.2, 0, 0, 1] }}
+      className="welcome-card-root"
       style={{
         position: "absolute",
-        top: "10%",
-        left: "35%",
-        transform: "translate(-50%, -50%)",
+        inset: 0,
+        margin: "auto",
         zIndex: 60,
-        width: "92%",
-        maxWidth: 620,
-        background: "rgba(8, 8, 22, 0.82)",
+        width: "min(92vw, 620px)",
+        height: "fit-content",
+        maxHeight: "90vh",
+        overflowY: "auto",
+        background: "rgba(8, 8, 22, 0.88)",
         backdropFilter: "blur(28px)",
         WebkitBackdropFilter: "blur(28px)",
         border:
           "1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.18)",
-        borderRadius: 32,
-        padding: "clamp(32px, 5vw, 44px) clamp(28px, 5vw, 40px)",
+        borderRadius: 28,
+        padding: "clamp(20px, 4vh, 44px) clamp(20px, 4vw, 40px)",
         boxShadow:
           "0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.06), 0 0 60px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.08)",
         textAlign: "center",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
       }}
     >
       <motion.div
@@ -155,12 +159,12 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         transition={{ delay: 0.2, duration: 0.45 }}
         style={{
           fontFamily: "var(--md-font-display)",
-          fontSize: "clamp(30px, 6vw, 46px)",
+          fontSize: "clamp(22px, 5vw, 46px)",
           fontWeight: 800,
           color: "#fff",
           letterSpacing: "-0.5px",
           lineHeight: 1.1,
-          marginBottom: 12,
+          marginBottom: 8,
           textShadow:
             "0 0 50px rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.35)",
         }}
@@ -176,19 +180,19 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         transition={{ delay: 0.3, duration: 0.4 }}
         style={{
           display: "flex",
-          gap: 8,
+          gap: 6,
           justifyContent: "center",
           flexWrap: "wrap",
-          marginBottom: 24,
+          marginBottom: 14,
         }}
       >
         {roles.map((role) => (
           <span
             key={role}
             style={{
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 500,
-              padding: "4px 12px",
+              padding: "3px 10px",
               borderRadius: 9999,
               background: "rgba(255,255,255,0.07)",
               border: "1px solid rgba(255,255,255,0.12)",
@@ -205,13 +209,14 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35, duration: 0.45 }}
+        className="welcome-card-desc"
         style={{
           fontFamily: "var(--md-font-body)",
-          fontSize: 14,
-          lineHeight: 1.75,
+          fontSize: 13,
+          lineHeight: 1.65,
           color: "#a8a8c3",
           maxWidth: 470,
-          margin: "0 auto 28px",
+          margin: "0 auto 16px",
         }}
       >
         Step into a spatial-computing-inspired workspace that redefines how you
@@ -224,20 +229,21 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.42, duration: 0.4 }}
+        className="welcome-card-tips"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: 10,
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 8,
           textAlign: "left",
-          marginBottom: 22,
+          marginBottom: 16,
         }}
       >
         {quickTips.map((tip) => (
           <div
             key={tip.title}
             style={{
-              padding: "14px 14px 12px",
-              borderRadius: 18,
+              padding: "10px 12px",
+              borderRadius: 14,
               background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.08)",
             }}
@@ -245,10 +251,10 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
             <div
               style={{
                 fontFamily: "var(--md-font-body)",
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 700,
                 color: "#f8f7ff",
-                marginBottom: 4,
+                marginBottom: 3,
               }}
             >
               {tip.title}
@@ -256,8 +262,8 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
             <div
               style={{
                 fontFamily: "var(--md-font-body)",
-                fontSize: 12,
-                lineHeight: 1.5,
+                fontSize: 11,
+                lineHeight: 1.4,
                 color: "#9ea3ba",
               }}
             >
@@ -271,10 +277,11 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.45 }}
+        className="welcome-card-theme"
         style={{
-          marginBottom: 28,
-          padding: "16px 18px",
-          borderRadius: 22,
+          marginBottom: 18,
+          padding: "12px 16px",
+          borderRadius: 18,
           background:
             "linear-gradient(135deg, rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.16), rgba(255,255,255,0.03))",
           border:
@@ -381,21 +388,21 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         transition={{ delay: 0.68, duration: 0.4 }}
         style={{
           display: "flex",
-          gap: 12,
+          gap: 10,
           flexWrap: "wrap",
           justifyContent: "center",
-          marginBottom: 14,
+          marginBottom: 12,
         }}
       >
         <button
           onClick={handleStartExploring}
           style={{
-            padding: "13px 28px",
+            padding: "11px 24px",
             borderRadius: 9999,
             background: "var(--md-primary)",
             color: "var(--md-on-primary)",
             fontFamily: "var(--md-font-body)",
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 700,
             border: "none",
             cursor: "pointer",
@@ -420,7 +427,7 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         <button
           onClick={handleTryThemes}
           style={{
-            padding: "13px 28px",
+            padding: "11px 24px",
             borderRadius: 9999,
             background:
               "rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.1)",
@@ -428,7 +435,7 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
               "1px solid rgba(var(--accent-r), var(--accent-g), var(--accent-b), 0.25)",
             color: "#e4e1ec",
             fontFamily: "var(--md-font-body)",
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
             transition: "background 0.15s ease, border-color 0.15s ease",
@@ -452,13 +459,13 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
         <button
           onClick={toggleFullscreen}
           style={{
-            padding: "13px 28px",
+            padding: "11px 24px",
             borderRadius: 9999,
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
             color: "#e4e1ec",
             fontFamily: "var(--md-font-body)",
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
             display: "flex",
@@ -476,8 +483,8 @@ export default function HeroWelcomeCard({ onDismiss }: Props) {
           }}
         >
           <svg
-            width="16"
-            height="16"
+            width="15"
+            height="15"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

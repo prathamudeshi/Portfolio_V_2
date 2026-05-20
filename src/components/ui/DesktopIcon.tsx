@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { usePanelManager, type PanelId } from '@/hooks/usePanelManager';
 
 interface DesktopIconProps {
@@ -10,30 +10,12 @@ interface DesktopIconProps {
   label: string;
 }
 
-const GRID_SIZE = 100;
-
 export default function DesktopIcon({ id, icon, label }: DesktopIconProps) {
   const { togglePanel } = usePanelManager();
   const [isHovered, setIsHovered] = useState(false);
-  const isDragging = useRef(false);
 
   return (
     <motion.div
-      drag
-      dragMomentum={false}
-      dragTransition={{
-        power: 0,
-        modifyTarget: (target) => Math.round(target / GRID_SIZE) * GRID_SIZE,
-      }}
-      onDragStart={() => {
-        isDragging.current = true;
-      }}
-      onDragEnd={() => {
-        // Small delay to ensure any trailing tap events are ignored
-        setTimeout(() => {
-          isDragging.current = false;
-        }, 100);
-      }}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.05 }}
@@ -41,9 +23,7 @@ export default function DesktopIcon({ id, icon, label }: DesktopIconProps) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onTap={() => {
-        if (!isDragging.current) {
-          togglePanel(id);
-        }
+        togglePanel(id);
       }}
       style={{
         width: 80,

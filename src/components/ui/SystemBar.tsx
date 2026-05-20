@@ -26,16 +26,17 @@ export default function SystemBar() {
 
   return (
     <div
+      className="system-bar"
       style={{
         position: 'absolute',
-        top: 14,
-        right: 20,
+        top: 12,
+        right: 18,
         zIndex: 100,
         display: 'flex',
         alignItems: 'center',
-        gap: 16,
+        gap: 14,
         color: '#fff',
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 600,
         fontFamily: 'system-ui, -apple-system, sans-serif',
         pointerEvents: 'none',

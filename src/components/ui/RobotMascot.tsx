@@ -314,9 +314,10 @@ export default function RobotMascot({
     <motion.div
       animate={{ bottom: heroVisible ? 202 : 24 }}
       transition={{ type: "spring", stiffness: 180, damping: 20 }}
+      className="robot-mascot-root"
       style={{
         position: "fixed",
-        right: "clamp(200px, 0.3vw, 6px)",
+        right: 16,
         zIndex: 1100,
         display: "flex",
         flexDirection: "column",
@@ -544,8 +545,8 @@ export default function RobotMascot({
         <div
           style={{
             position: "relative",
-            width: "clamp(160px, 18vw, 320px)",
-            height: "clamp(240px, 28vw, 340px)",
+            width: "clamp(90px, 14vw, 320px)",
+            height: "clamp(130px, 20vw, 340px)",
             overflow: "visible",
           }}
         >

@@ -228,12 +228,21 @@ function HeadTrackedCamera({ getSpatialState }: { getSpatialState: () => Spatial
 
   useFrame(() => {
     const state = getSpatialState();
-    if (!state.faceDetected) return; // Save math if not detected
+    
+    // Smoothly glide camera back to default center if face is not active
+    let targetX = 0;
+    let targetY = 0;
+    let targetZ = 0;
 
-    const { headX: x, headY: y, headZ: z } = state;
-    smoothX.current += (x - smoothX.current) * 0.1;
-    smoothY.current += (y - smoothY.current) * 0.1;
-    smoothZ.current += (z - smoothZ.current) * 0.08;
+    if (state.faceDetected) {
+      targetX = state.headX;
+      targetY = state.headY;
+      targetZ = state.headZ;
+    }
+
+    smoothX.current += (targetX - smoothX.current) * 0.08;
+    smoothY.current += (targetY - smoothY.current) * 0.08;
+    smoothZ.current += (targetZ - smoothZ.current) * 0.06;
 
     camera.position.x = smoothX.current * 2;
     camera.position.y = smoothY.current * 1.5;

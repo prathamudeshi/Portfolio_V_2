@@ -4,6 +4,7 @@
   "description": "Spatial computing portfolio of Pratham Udeshi, AI Engineer.",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "landscape",
   "background_color": "#05050f",
   "theme_color": "#818cf8",
   "icons": [

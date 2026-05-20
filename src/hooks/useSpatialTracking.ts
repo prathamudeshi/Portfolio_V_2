@@ -264,6 +264,10 @@ export function useSpatialTracking() {
 
     peaceFrames: 0,
     thumbsUpFrames: 0,
+
+    headX: 0,
+    headY: 0,
+    headZ: 0,
   });
 
   const [webcamActive, setWebcamActive] = useState(false);
@@ -330,6 +334,7 @@ export function useSpatialTracking() {
         await loadMediaPipeScripts();
         if (cleanup) return;
 
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: "user" },
           audio: false,
@@ -375,6 +380,7 @@ export function useSpatialTracking() {
 
         (window as any)._snapshotInterval = snapshotInterval;
         */
+
       } catch {
         console.error("[spatialTracking] Webcam unavailable");
         setWebcamActive(false);
@@ -421,13 +427,23 @@ export function useSpatialTracking() {
             // X/Y with sensitivity multiplier
             const mx = (le.x + re.x) / 2;
             const my = (le.y + re.y) / 2;
-            stateRef.current.headX = (mx - 0.5) * 2 * sensitivity;
-            stateRef.current.headY = (my - 0.5) * 2 * sensitivity;
+            const rawHeadX = (mx - 0.5) * 2 * sensitivity;
+            const rawHeadY = (my - 0.5) * 2 * sensitivity;
 
             // Z
             const eyeDist = distance(le, re);
-            stateRef.current.headZ =
-              (eyeDist - BASELINE_EYE_DIST) / BASELINE_EYE_DIST;
+            const rawHeadZ = (eyeDist - BASELINE_EYE_DIST) / BASELINE_EYE_DIST;
+
+            // Apply EMA smoothing to face coordinates to completely eliminate webcam micro-jitter
+            const sm = smoothRef.current;
+            const faceAlpha = 0.15; // highly responsive but smooth
+            sm.headX = ema(rawHeadX, sm.headX, faceAlpha);
+            sm.headY = ema(rawHeadY, sm.headY, faceAlpha);
+            sm.headZ = ema(rawHeadZ, sm.headZ, faceAlpha);
+
+            stateRef.current.headX = sm.headX;
+            stateRef.current.headY = sm.headY;
+            stateRef.current.headZ = sm.headZ;
 
             if (!stateRef.current.faceDetected) {
               stateRef.current.faceDetected = true;
@@ -440,7 +456,6 @@ export function useSpatialTracking() {
             }
           }
         });
-
         // Initialize Hands
         const hands = new HandsClass({
           locateFile: (file: string) =>
@@ -662,13 +677,25 @@ export function useSpatialTracking() {
 
         if (cleanup) return;
 
-        // Shared camera instance sends frames to both models
+        // Shared camera instance sends frames to both models concurrently
+        let isProcessing = false;
         const cam = new CameraClass(video, {
           onFrame: async () => {
-            if (cleanup) return;
-            const s = settingsRef.current;
-            if (s.faceTrackingEnabled) await faceMesh.send({ image: video });
-            if (s.handTrackingEnabled) await hands.send({ image: video });
+            if (cleanup || isProcessing) return;
+            isProcessing = true;
+            try {
+              const s = settingsRef.current;
+              if (s.faceTrackingEnabled) {
+                await faceMesh.send({ image: video });
+              }
+              if (s.handTrackingEnabled) {
+                await hands.send({ image: video });
+              }
+            } catch (err) {
+              console.error("[spatialTracking] Frame processing error:", err);
+            } finally {
+              isProcessing = false;
+            }
           },
           width: 640,
           height: 480,
