@@ -1,11 +1,11 @@
-'use client';
+"use client";
 /**
  * useSettings.ts — Zustand store for all user-configurable settings.
  */
 
-import { create } from 'zustand';
+import { create } from "zustand";
 
-export type ThemeName = 'indigo' | 'emerald' | 'rose' | 'amber' | 'cyan';
+export type ThemeName = "indigo" | "emerald" | "rose" | "amber" | "cyan";
 
 export interface SettingsState {
   // Theme
@@ -48,15 +48,15 @@ export interface SettingsState {
 }
 
 const defaults = {
-  theme: 'indigo' as ThemeName,
-  handTrackingEnabled: true,
-  handSmoothingFactor: 0.35,
-  pinchThreshold: 0.045,
-  pinchReleaseThreshold: 0.065,
-  pinchDebounceFrames: 4,
+  theme: "indigo" as ThemeName,
+  handTrackingEnabled: false,
+  handSmoothingFactor: 0.9,
+  pinchThreshold: 0.055,
+  pinchReleaseThreshold: 0.075,
+  pinchDebounceFrames: 2,
   cursorSize: 16,
   faceTrackingEnabled: true,
-  faceSensitivity: 1.0,
+  faceSensitivity: 1.7,
   showWebcam: true,
   webcamOpacity: 0.7,
   showStatusOverlay: true,
@@ -64,7 +64,7 @@ const defaults = {
 };
 
 function applyTheme(theme: ThemeName) {
-  if (typeof document !== 'undefined') {
+  if (typeof document !== "undefined") {
     document.documentElement.dataset.theme = theme;
   }
 }
@@ -77,24 +77,33 @@ export const useSettings = create<SettingsState>((set) => ({
     set({ theme: v });
   },
   setHandTrackingEnabled: (v) => set({ handTrackingEnabled: v }),
-  setHandSmoothingFactor: (v) => set({ handSmoothingFactor: Math.max(0.1, Math.min(0.9, v)) }),
+  setHandSmoothingFactor: (v) =>
+    set({ handSmoothingFactor: Math.max(0.1, Math.min(0.9, v)) }),
   setPinchThreshold: (v) => {
     const clamped = Math.max(0.03, Math.min(0.08, v));
     set({ pinchThreshold: clamped, pinchReleaseThreshold: clamped + 0.02 });
   },
   setCursorSize: (v) => set({ cursorSize: Math.max(8, Math.min(32, v)) }),
   setFaceTrackingEnabled: (v) => set({ faceTrackingEnabled: v }),
-  setFaceSensitivity: (v) => set({ faceSensitivity: Math.max(0.5, Math.min(3.0, v)) }),
+  setFaceSensitivity: (v) =>
+    set({ faceSensitivity: Math.max(0.5, Math.min(3.0, v)) }),
   setShowWebcam: (v) => set({ showWebcam: v }),
-  setWebcamOpacity: (v) => set({ webcamOpacity: Math.max(0.3, Math.min(1.0, v)) }),
+  setWebcamOpacity: (v) =>
+    set({ webcamOpacity: Math.max(0.3, Math.min(1.0, v)) }),
   setShowStatusOverlay: (v) => set({ showStatusOverlay: v }),
   setIsFullscreen: (v) => set({ isFullscreen: v }),
 
   toggleFullscreen: () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => set({ isFullscreen: true })).catch(() => {});
+      document.documentElement
+        .requestFullscreen()
+        .then(() => set({ isFullscreen: true }))
+        .catch(() => {});
     } else {
-      document.exitFullscreen().then(() => set({ isFullscreen: false })).catch(() => {});
+      document
+        .exitFullscreen()
+        .then(() => set({ isFullscreen: false }))
+        .catch(() => {});
     }
   },
 

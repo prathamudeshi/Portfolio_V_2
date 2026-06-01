@@ -28,8 +28,8 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
       viewport={{ once: true }}
       className="m3-card-elevated"
       style={{
-        width: 340,
-        minWidth: 280,
+        width: '100%',
+        maxWidth: 340,
         flex: '0 1 340px',
         display: 'flex',
         flexDirection: 'column',
@@ -174,6 +174,7 @@ export default function WorksSection() {
           marginTop: 56,
           display: 'flex',
           flexWrap: 'wrap',
+          justifyContent: 'center',
           gap: 24,
         }}>
           {projects.map((project, index) => (

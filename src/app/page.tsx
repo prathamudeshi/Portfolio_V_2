@@ -6,6 +6,33 @@ import PortfolioNav from '@/components/portfolio/PortfolioNav';
 // Hero — always needs to load immediately
 const Workspace = dynamic(() => import('@/components/Workspace'), {
   ssr: false,
+  loading: () => (
+    <div style={{
+      width: '100%',
+      height: '100vh',
+      background: '#05050f',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      {/* A clean, styled loading cue that matches the boot theme */}
+      <div style={{
+        fontFamily: 'monospace',
+        color: '#818cf8',
+        fontSize: 14,
+        letterSpacing: '2px',
+        animation: 'pulse 1.5s infinite ease-in-out',
+      }}>
+        INITIALIZING NEXUS OS...
+      </div>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  ),
 });
 
 // Portfolio sections — lazy-loaded only when the module is needed.

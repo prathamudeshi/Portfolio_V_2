@@ -163,10 +163,19 @@ export default function RobotMascot({
   const [expanded, setExpanded] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
   const [currentAction, setCurrentAction] = useState<MascotAction>("idle");
+  const [isMobile, setIsMobile] = useState(false);
   const revertTimeoutRef = useRef<number | null>(null);
   const ambientTimeoutRef = useRef<number | null>(null);
   const introCollapseTimeoutRef = useRef<number | null>(null);
   const seedRef = useRef(23);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const triggerAction = useCallback(
     (action: MascotAction, revertAfter = 1800) => {
@@ -312,7 +321,7 @@ export default function RobotMascot({
 
   return (
     <motion.div
-      animate={{ bottom: heroVisible ? 202 : 24 }}
+      animate={{ bottom: isMobile ? 80 : (expanded ? 24 : (heroVisible ? 202 : 24)) }}
       transition={{ type: "spring", stiffness: 180, damping: 20 }}
       className="robot-mascot-root"
       style={{
@@ -335,6 +344,8 @@ export default function RobotMascot({
             transition={{ duration: 0.22 }}
             style={{
               width: "min(88vw, 336px)",
+              maxHeight: isMobile ? "calc(100vh - 250px)" : "min(75vh, 480px)",
+              overflowY: "auto",
               padding: "16px 16px 14px",
               borderRadius: 24,
               background: "rgba(10, 12, 26, 0.92)",

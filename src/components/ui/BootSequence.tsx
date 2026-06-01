@@ -12,7 +12,7 @@ interface Props {
 }
 
 const bootLines = [
-  { text: 'NEXUS OS v2.1.0', delay: 150 },
+  { text: 'NEXUS OS v2.0.0', delay: 150 },
   { text: '─────────────────────────────', delay: 80 },
   { text: '[OK] Initializing WebGL pipeline...', delay: 280 },
   { text: '[OK] Loading face mesh model...', delay: 350 },
@@ -85,10 +85,10 @@ export default function BootSequence({ onComplete }: Props) {
                   color: line.startsWith('[OK]')
                     ? '#22c55e'
                     : line.startsWith('NEXUS')
-                    ? 'var(--accent)'
-                    : line.startsWith('─')
-                    ? '#334155'
-                    : '#94a3b8',
+                      ? 'var(--accent)'
+                      : line.startsWith('─')
+                        ? '#334155'
+                        : '#94a3b8',
                 }}
               >
                 {line}

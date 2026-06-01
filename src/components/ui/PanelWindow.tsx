@@ -70,7 +70,14 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
 
   const onDragEnd = useCallback((e: React.PointerEvent) => {
     dragRef.current = null;
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    try {
+      const el = e.target as HTMLElement;
+      if (el && typeof el.hasPointerCapture === "function" && el.hasPointerCapture(e.pointerId)) {
+        el.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {
+      console.warn("[PanelWindow] Pointer capture release failed:", err);
+    }
   }, []);
 
   // ── Resize state ────────────────────────────────────────────
@@ -92,7 +99,14 @@ export default function PanelWindow({ id, title, icon, children }: Props) {
 
   const onResizeEnd = useCallback((e: React.PointerEvent) => {
     resizeRef.current = null;
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    try {
+      const el = e.target as HTMLElement;
+      if (el && typeof el.hasPointerCapture === "function" && el.hasPointerCapture(e.pointerId)) {
+        el.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) {
+      console.warn("[PanelWindow] Pointer capture release failed:", err);
+    }
   }, []);
 
   if (!panel.isOpen || panel.isMinimized) return null;

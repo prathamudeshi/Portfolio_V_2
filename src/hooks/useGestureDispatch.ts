@@ -11,8 +11,9 @@
 import { useEffect, useRef } from 'react';
 import { type SpatialState } from './useSpatialTracking';
 
-const CLICK_MOVE_TOLERANCE_PX = 10;
-const CLICK_MAX_DURATION_MS = 650;
+const DRAG_START_THRESHOLD_PX = 12;
+const CLICK_MOVE_TOLERANCE_PX = 15;
+const CLICK_MAX_DURATION_MS = 850;
 
 export function useGestureDispatch(getSpatialState: () => SpatialState) {
   const lastState = useRef({
@@ -27,6 +28,7 @@ export function useGestureDispatch(getSpatialState: () => SpatialState) {
     pinchStartX: 0,
     pinchStartY: 0,
     pinchStartTime: 0,
+    isDraggingActive: false,
   });
 
   useEffect(() => {
@@ -79,11 +81,20 @@ export function useGestureDispatch(getSpatialState: () => SpatialState) {
           lastState.current.pinchStartX = px;
           lastState.current.pinchStartY = py;
           lastState.current.pinchStartTime = performance.now();
+          lastState.current.isDraggingActive = false; // Reset drag flag at start of pinch
           el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, clientX: px, clientY: py, pointerId: 1, isPrimary: true }));
         }
       } else if (isPinching && wasPinching) {
         if (targetElement) {
-          targetElement.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, cancelable: true, clientX: px, clientY: py, pointerId: 1, isPrimary: true }));
+          const dx = px - lastState.current.pinchStartX;
+          const dy = py - lastState.current.pinchStartY;
+          const movedPx = Math.sqrt(dx * dx + dy * dy);
+
+          // Drag activates if we have already activated it, or if we moved past the threshold
+          if (lastState.current.isDraggingActive || movedPx > DRAG_START_THRESHOLD_PX) {
+            lastState.current.isDraggingActive = true;
+            targetElement.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, cancelable: true, clientX: px, clientY: py, pointerId: 1, isPrimary: true }));
+          }
         }
       } else if (!isPinching && wasPinching) {
         if (targetElement) {
@@ -92,7 +103,9 @@ export function useGestureDispatch(getSpatialState: () => SpatialState) {
           const dy = py - lastState.current.pinchStartY;
           const movedPx = Math.sqrt(dx * dx + dy * dy);
           const heldMs = performance.now() - lastState.current.pinchStartTime;
-          if (movedPx <= CLICK_MOVE_TOLERANCE_PX && heldMs <= CLICK_MAX_DURATION_MS) {
+
+          // A click is registered if we did NOT start dragging, and we fit in the time window
+          if (!lastState.current.isDraggingActive && movedPx <= CLICK_MOVE_TOLERANCE_PX && heldMs <= CLICK_MAX_DURATION_MS) {
             targetElement.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: px, clientY: py }));
           }
           targetElement = null;

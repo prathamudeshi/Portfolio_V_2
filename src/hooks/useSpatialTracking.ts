@@ -98,25 +98,31 @@ function loadScript(id: string, src: string): Promise<void> {
   });
 }
 
-async function loadMediaPipeScripts() {
+async function loadMediaPipeBase() {
   await Promise.all([
     loadScript(
       "mediapipe-camera-utils",
       "https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js",
     ),
     loadScript(
-      "mediapipe-face-mesh",
-      "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js",
-    ),
-    loadScript(
-      "mediapipe-hands",
-      "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js",
-    ),
-    loadScript(
       "mediapipe-drawing-utils",
       "https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js",
     ),
   ]);
+}
+
+async function loadHandScripts() {
+  await loadScript(
+    "mediapipe-hands",
+    "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js",
+  );
+}
+
+async function loadFaceScripts() {
+  await loadScript(
+    "mediapipe-face-mesh",
+    "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js",
+  );
 }
 
 function distance(p1: { x: number; y: number }, p2: { x: number; y: number }) {
@@ -169,6 +175,16 @@ function isFingerExtended(
   );
 }
 
+function isFingerCurled(
+  lm: HandLandmark[],
+  tip: number,
+  mcp: number,
+  scale: number,
+) {
+  const wrist = lm[0];
+  return distance3D(wrist, lm[tip]) < distance3D(wrist, lm[mcp]) + scale * 0.1;
+}
+
 function isThumbExtended(lm: HandLandmark[], scale: number) {
   return (
     distance3D(lm[0], lm[4]) > distance3D(lm[0], lm[3]) + scale * 0.06 &&
@@ -192,7 +208,6 @@ function analyzeHandPose(
   const scale = getHandScale(lm);
   const thumbIndexRatio = distance3D(lm[4], lm[8]) / scale;
   const thumbMiddleRatio = distance3D(lm[4], lm[12]) / scale;
-  const indexMiddleRatio = distance3D(lm[8], lm[12]) / scale;
 
   const indexExt = isFingerExtended(lm, 8, 6, 5, scale);
   const middleExt = isFingerExtended(lm, 12, 10, 9, scale);
@@ -200,8 +215,8 @@ function analyzeHandPose(
   const pinkyExt = isFingerExtended(lm, 20, 18, 17, scale);
   const thumbExt = isThumbExtended(lm, scale);
 
-  const pinchIsIsolated =
-    thumbIndexRatio < thumbMiddleRatio * 0.9 && indexMiddleRatio > 0.14;
+  // Relax isolation: only require that the thumb tip is closer to the index tip than the middle tip
+  const pinchIsIsolated = thumbIndexRatio < thumbMiddleRatio * 0.95;
 
   return {
     indexExt,
@@ -221,10 +236,17 @@ function ema(current: number, previous: number, alpha: number): number {
 
 const DEAD_ZONE = 0.003; // Ignore movements smaller than this (normalized)
 
+function getResponsiveWebcamWidth() {
+  if (typeof window !== "undefined" && window.innerWidth < 768) {
+    return "90px";
+  }
+  return "220px";
+}
+
 export function useSpatialTracking() {
-  const trackingRequested = useSettings(
-    (s) => s.faceTrackingEnabled || s.handTrackingEnabled,
-  );
+  const faceTrackingEnabled = useSettings((s) => s.faceTrackingEnabled);
+  const handTrackingEnabled = useSettings((s) => s.handTrackingEnabled);
+  const trackingRequested = faceTrackingEnabled || handTrackingEnabled;
 
   const stateRef = useRef<SpatialState>({
     headX: 0,
@@ -297,21 +319,22 @@ export function useSpatialTracking() {
       return;
     }
 
+    const isMobileInit = typeof window !== "undefined" && window.innerWidth < 768;
     const video = document.createElement("video");
     video.setAttribute("autoplay", "");
     video.setAttribute("playsinline", "");
     video.setAttribute("muted", "");
     video.style.position = "fixed";
-    video.style.bottom = "16px";
-    video.style.left = "16px";
-    video.style.width = "280px";
-    video.style.borderRadius = "12px";
+    video.style.bottom = isMobileInit ? "12px" : "16px";
+    video.style.left = isMobileInit ? "12px" : "16px";
+    video.style.width = getResponsiveWebcamWidth();
+    video.style.borderRadius = isMobileInit ? "8px" : "12px";
     video.style.border = "2px solid rgba(255,255,255,0.1)";
     video.style.zIndex = "50";
     video.style.transform = "scaleX(-1)"; // Mirror for user
     video.style.opacity = "0";
     video.style.pointerEvents = "none";
-    video.style.transition = "opacity 0.2s";
+    video.style.transition = "opacity 0.2s, width 0.2s, bottom 0.2s, left 0.2s, border-radius 0.2s";
     video.id = "spatial-tracking-video";
     document.body.appendChild(video);
     videoRef.current = video;
@@ -325,13 +348,30 @@ export function useSpatialTracking() {
         const s = settingsRef.current;
         const op = s.showWebcam ? String(s.webcamOpacity) : "0";
         v.style.opacity = op;
-        v.style.width = "280px";
+        v.style.width = getResponsiveWebcamWidth();
+        if (typeof window !== "undefined") {
+          const isMobileViewport = window.innerWidth < 768;
+          v.style.bottom = isMobileViewport ? "12px" : "16px";
+          v.style.left = isMobileViewport ? "12px" : "16px";
+          v.style.borderRadius = isMobileViewport ? "8px" : "12px";
+        }
       }
     }, 200);
 
     (async () => {
       try {
-        await loadMediaPipeScripts();
+        await loadMediaPipeBase();
+        if (cleanup) return;
+
+        const s = settingsRef.current;
+        const scriptPromises = [];
+        if (s.handTrackingEnabled) {
+          scriptPromises.push(loadHandScripts());
+        }
+        if (s.faceTrackingEnabled) {
+          scriptPromises.push(loadFaceScripts());
+        }
+        await Promise.all(scriptPromises);
         if (cleanup) return;
 
 
@@ -384,19 +424,42 @@ export function useSpatialTracking() {
       } catch {
         console.error("[spatialTracking] Webcam unavailable");
         setWebcamActive(false);
+
+        // Listen for permission change to granted and reload browser automatically to recover camera tracking
+        if (typeof navigator !== "undefined" && navigator.permissions && navigator.permissions.query) {
+          navigator.permissions.query({ name: 'camera' as PermissionName })
+            .then((status) => {
+              status.onchange = () => {
+                if (status.state === 'granted') {
+                  window.location.reload();
+                }
+              };
+            })
+            .catch(() => {});
+        }
         return;
       }
 
       try {
+        const s = settingsRef.current;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const FaceMeshClass = (await waitForGlobal("FaceMesh")) as any;
+        let FaceMeshClass: any = null;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const HandsClass = (await waitForGlobal("Hands")) as any;
+        let HandsClass: any = null;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const CameraClass = (await waitForGlobal("Camera")) as any;
 
+        if (s.faceTrackingEnabled) {
+          FaceMeshClass = (await waitForGlobal("FaceMesh")) as any;
+        }
+        if (s.handTrackingEnabled) {
+          HandsClass = (await waitForGlobal("Hands")) as any;
+        }
+
         // Initialize FaceMesh
-        const faceMesh = new FaceMeshClass({
+        let faceMesh: any = null;
+        if (FaceMeshClass) {
+          faceMesh = new FaceMeshClass({
           locateFile: (file: string) =>
             `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`,
         });
@@ -456,19 +519,22 @@ export function useSpatialTracking() {
             }
           }
         });
+        }
         // Initialize Hands
-        const hands = new HandsClass({
-          locateFile: (file: string) =>
-            `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
-        });
-        hands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 1,
-          minDetectionConfidence: 0.7,
-          minTrackingConfidence: 0.7,
-        });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        hands.onResults((results: any) => {
+        let hands: any = null;
+        if (HandsClass) {
+          hands = new HandsClass({
+            locateFile: (file: string) =>
+              `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`,
+          });
+          hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7,
+          });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          hands.onResults((results: any) => {
           const settings = settingsRef.current;
 
           if (!settings.handTrackingEnabled) {
@@ -493,24 +559,9 @@ export function useSpatialTracking() {
 
           if (detectedHands.length > 0) {
             const sm = smoothRef.current;
-            const alpha = settings.handSmoothingFactor; // lower = smoother
 
             // ── Hand 1 Process ──
             const lm1 = detectedHands[0].landmarks;
-            const rawX = 1 - lm1[8].x;
-            const rawY = lm1[8].y;
-
-            const newX = ema(rawX, sm.handX, alpha);
-            const newY = ema(rawY, sm.handY, alpha);
-            if (
-              Math.abs(newX - sm.handX) > DEAD_ZONE ||
-              Math.abs(newY - sm.handY) > DEAD_ZONE
-            ) {
-              sm.handX = newX;
-              sm.handY = newY;
-            }
-            stateRef.current.handX = sm.handX;
-            stateRef.current.handY = sm.handY;
 
             const hand1Pose = analyzeHandPose(
               lm1,
@@ -529,23 +580,64 @@ export function useSpatialTracking() {
             if (
               !sm.isPinchLocked &&
               sm.pinchFrames >= settings.pinchDebounceFrames
-            )
+            ) {
               sm.isPinchLocked = true;
-            else if (
-              sm.isPinchLocked &&
-              hand1Pose.rawRelease &&
-              sm.releasedFrames >= 3
-            )
-              sm.isPinchLocked = false;
+            } else if (sm.isPinchLocked) {
+              // Rapid/immediate release: if rawRelease is triggered, or if not rawPinch for 2 consecutive frames
+              if (hand1Pose.rawRelease || sm.releasedFrames >= 2) {
+                sm.isPinchLocked = false;
+              }
+            }
 
             stateRef.current.isPinching = sm.isPinchLocked;
 
+            // Biomechanically projected Index knuckle coordinate tracking to stop cursor jump/slide:
+            // lm1[5] is the Index MCP joint (knuckle), lm1[6] is the Index PIP joint.
+            // The segment 5->6 is rigid and doesn't bend relative to the hand during a pinch.
+            // Extending this vector by a factor of 2.2 projects the stable index tip position.
+            const rawX = 1 - (lm1[5].x + (lm1[6].x - lm1[5].x) * 2.2);
+            const rawY = lm1[5].y + (lm1[6].y - lm1[5].y) * 2.2;
+
+            // Adaptive Velocity EMA filter (One Euro low-pass concept):
+            // Calculate speed (distance from previous filtered coordinate)
+            const dx = rawX - sm.handX;
+            const dy = rawY - sm.handY;
+            const speed = Math.sqrt(dx * dx + dy * dy);
+
+            // Dynamically scale alpha based on speed:
+            // At speed = 0, alpha is derived from settings.handSmoothingFactor (Higher = smoother)
+            const minAlpha = Math.max(0.01, 0.45 - (settings.handSmoothingFactor * 0.5));
+            const maxAlpha = 0.85;
+            const speedThreshold = 0.035;
+            const speedRatio = Math.min(speed / speedThreshold, 1);
+            const adaptiveAlpha = minAlpha + (maxAlpha - minAlpha) * speedRatio;
+
+            const newX = ema(rawX, sm.handX, adaptiveAlpha);
+            const newY = ema(rawY, sm.handY, adaptiveAlpha);
+            if (
+              Math.abs(newX - sm.handX) > DEAD_ZONE ||
+              Math.abs(newY - sm.handY) > DEAD_ZONE
+            ) {
+              sm.handX = newX;
+              sm.handY = newY;
+            }
+            stateRef.current.handX = sm.handX;
+            stateRef.current.handY = sm.handY;
+
+            // Strict curl checking to make discrete gestures extremely robust
+            const scale1 = getHandScale(lm1);
+            const indexCurled1 = isFingerCurled(lm1, 8, 5, scale1);
+            const middleCurled1 = isFingerCurled(lm1, 12, 9, scale1);
+            const ringCurled1 = isFingerCurled(lm1, 16, 13, scale1);
+            const pinkyCurled1 = isFingerCurled(lm1, 20, 17, scale1);
+
             stateRef.current.isPointing =
               hand1Pose.indexExt &&
-              !hand1Pose.middleExt &&
-              !hand1Pose.ringExt &&
-              !hand1Pose.pinkyExt &&
+              middleCurled1 &&
+              ringCurled1 &&
+              pinkyCurled1 &&
               !stateRef.current.isPinching;
+
             stateRef.current.isOpenPalm =
               hand1Pose.indexExt &&
               hand1Pose.middleExt &&
@@ -553,19 +645,16 @@ export function useSpatialTracking() {
               hand1Pose.pinkyExt &&
               !stateRef.current.isPinching;
 
+            // Peace sign requires index & middle extended, ring & pinky tightly curled
             const rawPeaceSign =
               hand1Pose.indexExt &&
               hand1Pose.middleExt &&
-              !hand1Pose.ringExt &&
-              !hand1Pose.pinkyExt &&
+              ringCurled1 &&
+              pinkyCurled1 &&
               !stateRef.current.isPinching;
-            const rawThumbsUp =
-              hand1Pose.thumbExt &&
-              !hand1Pose.indexExt &&
-              !hand1Pose.middleExt &&
-              !hand1Pose.ringExt &&
-              !hand1Pose.pinkyExt &&
-              lm1[4].y < lm1[2].y;
+
+            // Thumbs up gesture is disabled for now
+            const rawThumbsUp = false;
 
             sm.peaceFrames = rawPeaceSign ? sm.peaceFrames + 1 : 0;
             sm.thumbsUpFrames = rawThumbsUp ? sm.thumbsUpFrames + 1 : 0;
@@ -582,20 +671,6 @@ export function useSpatialTracking() {
             // ── Hand 2 Process ──
             if (detectedHands.length > 1) {
               const lm2 = detectedHands[1].landmarks;
-              const rawX2 = 1 - lm2[8].x;
-              const rawY2 = lm2[8].y;
-
-              const newX2 = ema(rawX2, sm.hand2X, alpha);
-              const newY2 = ema(rawY2, sm.hand2Y, alpha);
-              if (
-                Math.abs(newX2 - sm.hand2X) > DEAD_ZONE ||
-                Math.abs(newY2 - sm.hand2Y) > DEAD_ZONE
-              ) {
-                sm.hand2X = newX2;
-                sm.hand2Y = newY2;
-              }
-              stateRef.current.hand2X = sm.hand2X;
-              stateRef.current.hand2Y = sm.hand2Y;
 
               const hand2Pose = analyzeHandPose(
                 lm2,
@@ -614,16 +689,37 @@ export function useSpatialTracking() {
               if (
                 !sm.isPinchLocked2 &&
                 sm.pinchFrames2 >= settings.pinchDebounceFrames
-              )
+              ) {
                 sm.isPinchLocked2 = true;
-              else if (
-                sm.isPinchLocked2 &&
-                hand2Pose.rawRelease &&
-                sm.releasedFrames2 >= 3
-              )
-                sm.isPinchLocked2 = false;
+              } else if (sm.isPinchLocked2) {
+                if (hand2Pose.rawRelease || sm.releasedFrames2 >= 2) {
+                  sm.isPinchLocked2 = false;
+                }
+              }
 
               stateRef.current.isPinching2 = sm.isPinchLocked2;
+
+              const rawX2 = 1 - (lm2[5].x + (lm2[6].x - lm2[5].x) * 2.2);
+              const rawY2 = lm2[5].y + (lm2[6].y - lm2[5].y) * 2.2;
+
+              const dx2 = rawX2 - sm.hand2X;
+              const dy2 = rawY2 - sm.hand2Y;
+              const speed2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+              const speedRatio2 = Math.min(speed2 / speedThreshold, 1);
+              const adaptiveAlpha2 = minAlpha + (maxAlpha - minAlpha) * speedRatio2;
+
+              const newX2 = ema(rawX2, sm.hand2X, adaptiveAlpha2);
+              const newY2 = ema(rawY2, sm.hand2Y, adaptiveAlpha2);
+              if (
+                Math.abs(newX2 - sm.hand2X) > DEAD_ZONE ||
+                Math.abs(newY2 - sm.hand2Y) > DEAD_ZONE
+              ) {
+                sm.hand2X = newX2;
+                sm.hand2Y = newY2;
+              }
+              stateRef.current.hand2X = sm.hand2X;
+              stateRef.current.hand2Y = sm.hand2Y;
 
               stateRef.current.isOpenPalm2 =
                 hand2Pose.indexExt &&
@@ -674,22 +770,30 @@ export function useSpatialTracking() {
             }
           }
         });
+        }
 
         if (cleanup) return;
 
-        // Shared camera instance sends frames to both models concurrently
+        // Shared camera instance sends frames to models sequentially (interleaved to prevent WASM thread collisions)
         let isProcessing = false;
+        let camFrameCount = 0;
         const cam = new CameraClass(video, {
           onFrame: async () => {
             if (cleanup || isProcessing) return;
             isProcessing = true;
             try {
               const s = settingsRef.current;
-              if (s.faceTrackingEnabled) {
-                await faceMesh.send({ image: video });
-              }
-              if (s.handTrackingEnabled) {
+              camFrameCount++;
+
+              // 1. Hand tracking drives the cursor — must process on every single frame for extreme responsiveness
+              if (hands && s.handTrackingEnabled) {
                 await hands.send({ image: video });
+              }
+
+              // 2. Face tracking mesh is heavy — throttle to 1 in 3 frames (~15-20fps). 
+              // This gives massive CPU/GPU relief while keeping sequential execution 100% thread-safe.
+              if (faceMesh && s.faceTrackingEnabled && camFrameCount % 3 === 0) {
+                await faceMesh.send({ image: video });
               }
             } catch (err) {
               console.error("[spatialTracking] Frame processing error:", err);
@@ -720,7 +824,7 @@ export function useSpatialTracking() {
       video.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackingRequested]);
+  }, [faceTrackingEnabled, handTrackingEnabled]);
 
   const getSpatialState = useCallback(() => stateRef.current, []);
 
