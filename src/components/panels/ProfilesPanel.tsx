@@ -108,7 +108,7 @@ export default function ProfilesPanel() {
             </div>
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0' }}>
-                Pratham_Udeshi_Resume_Full.docx
+                Pratham_Udeshi_Resume
               </div>
               <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
                 B.Tech Computer Engineering · AI & Full-Stack

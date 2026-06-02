@@ -24,7 +24,7 @@ const about = {
   location: 'Mumbai, India',
   email: 'udeshipratham@gmail.com',
   bio: 'Final-year B.Tech Computer Engineering student at K.J. Somaiya (CGPA 8.9) with 6+ internships spanning Agentic AI, LLM systems, full-stack development, and cybersecurity. Designed and shipped production-grade AI agents at Godrej Enterprises, including an Email Agent with human-in-the-loop and an Engineering Specsheet Analyzer achieving 98% accuracy.',
-  resumeUrl: '/Pratham_Udeshi_Resume.pdf',
+  resumeUrl: '/Pratham_Udeshi_CV.pdf',
   avatarUrl: '/images/avatar.png',
   /** Roles shown as cards in the About section (from Portfolio's services array) */
   services: [
